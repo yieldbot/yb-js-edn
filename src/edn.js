@@ -307,6 +307,13 @@ edn.Character = (function () {
     return this.char;
   };
 
+  // Internal: Node.js console.log inspect printer.
+  //
+  // Returns String.
+  Character.prototype.inspect = function () {
+    return "[edn.Character " + require('util').inspect(this.char) + "]";
+  };
+
   // Public: Register typeof check for Character.
   //
   // obj - Any value
@@ -471,6 +478,13 @@ edn.Symbol = (function () {
     return this.valueOf();
   };
 
+  // Internal: Node.js console.log inspect printer.
+  //
+  // Returns String.
+  Symbol.prototype.inspect = function () {
+    return "[edn.Symbol " + this.toString() + "]";
+  };
+
   // Public: Register typeof check for Symbol.
   //
   // obj - Any value
@@ -576,6 +590,13 @@ edn.Keyword = (function () {
   // Returns String.
   Keyword.prototype.toString = function () {
     return ":" + this.symbol.toString();
+  };
+
+  // Internal: Node.js console.log inspect printer.
+  //
+  // Returns String.
+  Keyword.prototype.inspect = function () {
+    return "[edn.Keyword " + this.toString() + "]";
   };
 
   // Public: Register typeof check for Keyword.
@@ -941,7 +962,7 @@ if (false && typeof Map !== 'undefined') {
     //
     // Returns String.
     Map.prototype.inspect = function () {
-      return require('util').inspect(this.items);
+      return "[edn.Map " + require('util').inspect(this.items) + "]";
     };
 
     return Map;
@@ -1094,7 +1115,7 @@ if (false && typeof Set !== 'undefined') {
     //
     // Returns String.
     Set.prototype.inspect = function () {
-      return require('util').inspect(this.values);
+      return "[edn.Set " + require('util').inspect(this.values) + "]";
     };
 
     return Set;
@@ -1218,6 +1239,14 @@ edn.Unknown = (function () {
     return '[object Unknown]';
   };
 
+  // Internal: Node.js console.log inspect printer.
+  //
+  // Returns String.
+  Unknown.prototype.inspect = function () {
+    return "[edn.Unknown " + this.tag + " " +
+      require('util').inspect(this.element) + "]";
+  };
+
   // Public: Register typeof check for Unknown.
   //
   // obj - Any value
@@ -1322,6 +1351,13 @@ edn.UUID = (function () {
   // Returns String.
   UUID.prototype.toString = function () {
     return this.value;
+  };
+
+  // Internal: Node.js console.log inspect printer.
+  //
+  // Returns String.
+  UUID.prototype.inspect = function () {
+    return "[edn.UUID " + this.value + "]";
   };
 
   // Public: Convert 'uuid' tag to UUID object.
