@@ -1,0 +1,10 @@
+{
+  "name": "edn",
+  "version": "0.1.0",
+  "main": "./edn.js",
+  "devDependencies": {
+    "jison": "0.3.12",
+    "jshint": "latest",
+    "nodeunit": "latest"
+  }
+}

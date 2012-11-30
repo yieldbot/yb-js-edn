@@ -1,0 +1,11 @@
+{
+  "camelcase": true,
+  "newcap": true,
+  "indent": 2,
+  "strict": true,
+  "trailing": true,
+  "maxlen": 80,
+  "es5": true,
+  "browser": true,
+  "node": true
+}
