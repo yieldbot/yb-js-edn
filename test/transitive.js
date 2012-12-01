@@ -4,12 +4,12 @@ var edn  = require('../edn');
 var fs   = require('fs');
 var exec = require('child_process').exec;
 
-var filename = __dirname + "/samples.clj";
+var filename = __dirname + "/transitive.clj";
 var data = fs.readFileSync(filename, 'utf8');
 
-var samples;
-samples = data.split("\n");
-samples = samples.slice(0, samples.length - 1);
+var tests;
+tests = data.split("\n");
+tests = tests.slice(0, tests.length - 1);
 
 function which(command, callback) {
   exec('which ' + command, function (err, stdout) {
@@ -17,9 +17,9 @@ function which(command, callback) {
   });
 }
 
-exports.samples = {
+exports.transitive = {
   "clojure": function (test) {
-    var expected = samples;
+    var expected = tests;
 
     var prog = "(require ['clojure.string :as 'str])" +
       '(println (str/join "\n" ' +
@@ -28,7 +28,7 @@ exports.samples = {
 
     which('clj', function (path) {
       if (!path) {
-        console.warn("Skipping samples - clojure test");
+        console.warn("Skipping transitive - clojure test");
         test.done();
         return;
       }
@@ -48,7 +48,7 @@ exports.samples = {
   },
 
   "js": function (test) {
-    var expected = samples;
+    var expected = tests;
 
     var i, obj;
     for (i = 0; i < expected.length; i++) {
