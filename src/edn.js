@@ -842,10 +842,14 @@ if (false && typeof Map !== 'undefined') {
       // nice with node's deepEqual function. Maybe some day it will
       // eventually support comparing Maps.
       Object.defineProperty(this, '_map', {
-        configurable: false,
         enumerable: true,
-        writable: false,
-        value: {}
+        get: function () {
+          var obj = {};
+          this.items.forEach(function (item) {
+            obj[edn.stringify(item[0])] = item[1];
+          });
+          return obj;
+        }
       });
     }
 
@@ -927,7 +931,6 @@ if (false && typeof Map !== 'undefined') {
       keys[index] = key;
       values[index] = value;
       items[index] = [key, value];
-      _map[edn.stringify(key)] = value;
       return value;
     };
 
@@ -947,7 +950,6 @@ if (false && typeof Map !== 'undefined') {
       keys.splice(index, 1);
       values.splice(index, 1);
       items.splice(index, 1);
-      delete _map[edn.stringify(key)];
       return true;
     };
 
