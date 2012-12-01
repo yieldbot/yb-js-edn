@@ -7,6 +7,10 @@
     "type": "git",
     "url": "git://github.com/josh/js-edn.git"
   },
+  "licenses": [{
+    "type": "MIT",
+    "url": "https://raw.github.com/josh/js-edn/master/LICENSE"
+  }],
   "devDependencies": {
     "jison": "0.3.12",
     "jshint": "latest",
