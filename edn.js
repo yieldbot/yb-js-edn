@@ -473,6 +473,51 @@ edn.stringify = function (obj) {
   }
 };
 
+// Public: Registered equality functions.
+//
+// Maps key type names to a isEqual function.
+//
+// Examples
+//
+//     edn.equal['myapp/Person'] = function (a, b) {
+//       return a.name == b.name;
+//     }
+//
+edn.equal = {};
+
+// Internal: Compare valueOf objects.
+//
+// a - Object
+// b - Object
+//
+// Returns true if values are equal, otherwise false.
+function compareValues(a, b) {
+  return a.valueOf() == b.valueOf();
+}
+
+// Internal: Compare Array objects.
+//
+// a - Array
+// b - Array
+//
+// Returns true if all collection values are equal.
+function compareArrayValues(a, b) {
+  var aLen = a.length;
+  var bLen = b.length;
+
+  if (aLen != bLen) {
+    return false;
+  }
+
+  for (var i = 0; i < aLen; i++) {
+    if (!edn.isEqual(a[i], b[i])) {
+      return false;
+    }
+  }
+
+  return true;
+}
+
 // Public: Deep compare edn values.
 //
 // In general, two values will be equal if they serialize to the same
@@ -490,33 +535,14 @@ edn.isEqual = function isEqual(a, b) {
   var aType = edn.typeOf(a);
   var bType = edn.typeOf(b);
 
+  var eq = edn.equal[aType];
+
   if (aType !== bType) {
     return false;
-
-  } else if (a === b) {
-    return true;
-
+  } else if (eq) {
+    return eq(a, b);
   } else {
-    switch (aType) {
-    case 'nil':
-      return bType == 'nil';
-    case 'boolean':
-    case 'string':
-    case 'float':
-    case 'integer':
-      return a.valueOf() == b.valueOf();
-    default:
-      var aKeys = Object.keys(a);
-      var bKeys = Object.keys(b);
-
-      if (aKeys.length != bKeys.length) {
-        return false;
-      }
-
-      return aKeys.every(function (k) {
-        return isEqual(a[k], b[k]);
-      });
-    }
+    throw new Error("No equal function for type " + aType);
   }
 };
 
@@ -632,6 +658,16 @@ function extend(target, obj1, obj2) {
   edn.printers.nil = function () {
     return "nil";
   };
+
+  // Public: Compare nil values.
+  //
+  // a - nil value
+  // b - nil value
+  //
+  // Always returns true since two nil types are always equal.
+  edn.equal.nil = function (a, b) {
+    return true;
+  };
 })();
 
 // Booleans
@@ -657,6 +693,14 @@ function extend(target, obj1, obj2) {
   edn.printers.boolean = function (bool) {
     return bool.valueOf() ? "true" : "false";
   };
+
+  // Public: Compare boolean values.
+  //
+  // a - boolean value
+  // b - boolean value
+  //
+  // Returns true if values are equal.
+  edn.equal.boolean = compareValues;
 })();
 
 // Strings
@@ -679,6 +723,14 @@ function extend(target, obj1, obj2) {
   edn.printers.string = function (str) {
     return JSON.stringify(str);
   };
+
+  // Public: Compare string values.
+  //
+  // a - string value
+  // b - string value
+  //
+  // Returns true if values are equal.
+  edn.equal.string = compareValues;
 })();
 
 // Characters
@@ -764,6 +816,14 @@ edn.Character = (function () {
       return "\\" + char[0];
     }
   };
+
+  // Public: Compare character values.
+  //
+  // a - character value
+  // b - character value
+  //
+  // Returns true if values are equal.
+  edn.equal.character = compareValues;
 
   // Public: Alias for Character function.
   edn.character = Character;
@@ -923,6 +983,14 @@ edn.Symbol = (function () {
     return symbol.toString();
   };
 
+  // Public: Compare symbol values.
+  //
+  // a - symbol value
+  // b - symbol value
+  //
+  // Returns true if values are equal.
+  edn.equal.symbol = compareValues;
+
   // Public: Alias for Symbol function.
   edn.symbol = Symbol;
 
@@ -1037,6 +1105,14 @@ edn.Keyword = (function () {
     return keyword.toString();
   };
 
+  // Public: Compare keyword values.
+  //
+  // a - keyword value
+  // b - keyword value
+  //
+  // Returns true if values are equal.
+  edn.equal.keyword = compareValues;
+
   // Public: Alias for Keyword function.
   edn.keyword = Keyword;
 
@@ -1071,6 +1147,14 @@ edn.Keyword = (function () {
   edn.printers.integer = function (n) {
     return n.toString();
   };
+
+  // Public: Compare integer values.
+  //
+  // a - integer value
+  // b - integer value
+  //
+  // Returns true if values are equal.
+  edn.equal.integer = compareValues;
 })();
 
 // Floating point numbers
@@ -1100,6 +1184,14 @@ edn.Keyword = (function () {
     if (!/\./.test(s)) s += ".0";
     return s;
   };
+
+  // Public: Compare float values.
+  //
+  // a - float value
+  // b - float value
+  //
+  // Returns true if values are equal.
+  edn.equal.float = compareValues;
 })();
 
 // Lists
@@ -1142,6 +1234,14 @@ edn.Keyword = (function () {
   edn.printers.list = function (ary) {
     return '(' + ary.map(edn.stringify).join(' ') + ')';
   };
+
+  // Public: Compare list collections.
+  //
+  // a - list value
+  // b - list value
+  //
+  // Returns true collection of values is equal.
+  edn.equal.list = compareArrayValues;
 })();
 
 // Vectors
@@ -1185,6 +1285,14 @@ edn.Keyword = (function () {
     return '[' + ary.map(edn.stringify).join(' ') + ']';
   };
 
+  // Public: Compare vector collections.
+  //
+  // a - vector value
+  // b - vector value
+  //
+  // Returns true collection of values is equal.
+  edn.equal.vector = compareArrayValues;
+
   // Public: Register typeof check for Array.
   //
   // obj - Any value
@@ -1195,13 +1303,13 @@ edn.Keyword = (function () {
       typeof obj.type == 'undefined';
   };
 
-  // Public: Stringify Array object.
+  // Public: Convert Array to Vector object.
   //
   // ary - Array object
   //
-  // Returns String.
-  edn.printers.array = function (ary) {
-    return '[' + ary.map(edn.stringify).join(' ') + ']';
+  // Returns Vector object.
+  edn.converters.array = function (ary) {
+    return edn.vector(ary);
   };
 })();
 
@@ -1429,6 +1537,33 @@ if (false && typeof Map !== 'undefined') {
     return "{" + m.join(", ") + "}";
   };
 
+  // Public: Compare map collections.
+  //
+  // a - map value
+  // b - map value
+  //
+  // Returns true collection of values is equal.
+  edn.equal.map = function (a, b) {
+    var aItems = a.items;
+    var bItems = b.items;
+
+    if (aItems.length != bItems.length) {
+      return false;
+    }
+
+    return aItems.every(function (aItem) {
+      var bItem = bItems.filter(function (bItem) {
+        return edn.isEqual(aItem[0], bItem[0]);
+      })[0];
+
+      if (bItem) {
+        return edn.isEqual(aItem[1], bItem[1]);
+      } else {
+        return false;
+      }
+    });
+  };
+
   // Public: Register type of check for plain Object.
   //
   // obj - Any value
@@ -1440,17 +1575,17 @@ if (false && typeof Map !== 'undefined') {
       (Object.getPrototypeOf(obj) === Object.prototype);
   };
 
-  // Public: Stringify Object.
+  // Public: Convert Object to and EDN map.
   //
-  // obj - Object
+  // obj - Plain Object
   //
-  // Returns String.
-  edn.printers.object = function (obj) {
-    var m = Object.keys(obj).map(function (key) {
-      return edn.stringify(edn.keyword(key)) + " " +
-        edn.stringify(obj[key]);
+  // Returns a Map object.
+  edn.converters.object = function (obj) {
+    var map = new edn.Map();
+    Object.keys(obj).forEach(function (key) {
+      map.set(edn.keyword(key), obj[key]);
     });
-    return "{" + m.join(", ") + "}";
+    return map;
   };
 })();
 
@@ -1580,6 +1715,27 @@ if (false && typeof Set !== 'undefined') {
   edn.printers.set = function (set) {
     return "#{" + set.values.map(edn.stringify).join(" ") + "}";
   };
+
+  // Public: Compare set collections.
+  //
+  // a - set value
+  // b - set value
+  //
+  // Returns true collection of values is equal.
+  edn.equal.set = function (a, b) {
+    var aValues = a.values;
+    var bValues = b.values;
+
+    if (aValues.length != bValues.length) {
+      return false;
+    }
+
+    return aValues.every(function (aValue) {
+      return bValues.some(function (bValue) {
+        return edn.isEqual(aValue, bValue);
+      });
+    });
+  };
 })();
 
 
@@ -1685,6 +1841,16 @@ edn.Unknown = (function () {
   // Returns String.
   edn.printers.unknown = function (obj) {
     return "#" + obj.tag + " " + edn.stringify(obj.element);
+  };
+
+  // Public: Compare unknown value.
+  //
+  // a - unknown value
+  // b - unknown value
+  //
+  // Returns true if unknown tag and elements are equal.
+  edn.equal.unknown = function (a, b) {
+    return edn.isEqual(a.tag, b.tag) && edn.isEqual(a.element, b.element);
   };
 
   // Public: Register default handler for unknown tags.
