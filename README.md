@@ -3,6 +3,16 @@
 JavaScript [edn](https://github.com/edn-format/edn) (extensible data notation) serializer.
 
 
+## Features
+
+* Parse and stringify functions are transitive
+* edn equality
+* Extensible type system
+* Tagged element dispatch hooks
+* Robust Jison grammar
+* ES5 compatibility
+* Backport Harmony style Maps and Sets
+
 ## Installation
 
 Via npm.
