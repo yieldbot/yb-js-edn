@@ -176,7 +176,7 @@ exports.objects = {
   },
 
   "date": function (test) {
-    var d = new Date(1985, 3, 12, 17, 20, 50, 520);
+    var d = new Date(Date.parse("1985-04-12T23:20:50.52Z"));
     test.equal('#inst "1985-04-12T23:20:50.520Z"', edn.stringify(d));
     test.done();
   },

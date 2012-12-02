@@ -19,7 +19,7 @@ exports.objects = {
   "date": function (test) {
     test.deepEqual(
       edn.generic('inst', "1985-04-12T23:20:50.520Z"),
-      edn.convert(new Date(1985, 3, 12, 17, 20, 50, 520))
+      edn.convert(new Date(Date.parse("1985-04-12T23:20:50.52Z")))
     );
     test.done();
   },

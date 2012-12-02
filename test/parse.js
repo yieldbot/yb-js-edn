@@ -144,9 +144,7 @@ exports.parse = {
   },
 
   "inst tag": function (test) {
-    var t;
-
-    t = new Date(1985, 3, 12, 17, 20, 50, 520);
+    var t = new Date(Date.parse("1985-04-12T23:20:50.52Z"));
     test.deepEqual(t, edn.parse('#inst "1985-04-12T23:20:50.52Z"'));
 
     test.done();
