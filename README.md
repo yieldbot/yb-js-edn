@@ -2,6 +2,7 @@
 
 JavaScript [edn](https://github.com/edn-format/edn) (extensible data notation) serializer.
 
+
 ## Installation
 
 Via npm.
@@ -112,6 +113,11 @@ edn.stringify(["foo", edn.keyword('bar'), 123])
 ### sets
 
 `#{1 2 3}` and `edn.set([1, 2, 3])` are equivalents. The Set object is a backported version of the proposed Harmony Set. A native Set may be returned in the future.
+
+
+## Compatibility
+
+Targets Node.js 0.8.x and up. As well as ES5 browsers.
 
 
 ## See Also
