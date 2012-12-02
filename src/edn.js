@@ -65,40 +65,6 @@ edn.stringify = function (obj) {
 //
 edn.equal = {};
 
-// Internal: Compare valueOf objects.
-//
-// a - Object
-// b - Object
-//
-// Returns true if values are equal, otherwise false.
-function compareValues(a, b) {
-  return a.valueOf() == b.valueOf();
-}
-
-// Internal: Compare Array objects.
-//
-// a - Array
-// b - Array
-// isEqual - isEqual function
-//
-// Returns true if all collection values are equal.
-function compareArrayValues(a, b, isEqual) {
-  var aLen = a.length;
-  var bLen = b.length;
-
-  if (aLen != bLen) {
-    return false;
-  }
-
-  for (var i = 0; i < aLen; i++) {
-    if (!isEqual(a[i], b[i])) {
-      return false;
-    }
-  }
-
-  return true;
-}
-
 // Public: Deep compare edn values.
 //
 // In general, two values will be equal if they serialize to the same
@@ -262,6 +228,40 @@ function extend(target, obj1, obj2) {
     target[k] = obj2[k];
   }
   return target;
+}
+
+// Internal: Compare valueOf objects.
+//
+// a - Object
+// b - Object
+//
+// Returns true if values are equal, otherwise false.
+function compareValues(a, b) {
+  return a.valueOf() == b.valueOf();
+}
+
+// Internal: Compare Array objects.
+//
+// a - Array
+// b - Array
+// isEqual - isEqual function
+//
+// Returns true if all collection values are equal.
+function compareArrayValues(a, b, isEqual) {
+  var aLen = a.length;
+  var bLen = b.length;
+
+  if (aLen != bLen) {
+    return false;
+  }
+
+  for (var i = 0; i < aLen; i++) {
+    if (!isEqual(a[i], b[i])) {
+      return false;
+    }
+  }
+
+  return true;
 }
 
 // Make Object#toString available
