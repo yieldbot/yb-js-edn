@@ -60,7 +60,7 @@ edn.parse('["foo", :bar, 123]')
 
 `true` and `true` are equivalents, as well as `false` and `false`. The parser always yields `boolean` primitives.
 
-## strings
+### strings
 
 `"hello"` and `"hello"` are equivalents. The parser always yields `string` primitives.
 
