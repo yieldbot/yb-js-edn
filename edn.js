@@ -505,15 +505,11 @@ edn.valueOf = function (obj, deep, options) {
   if (deep == void 0) deep = true;
   options = extendDefaultOptions(options);
 
-  function identity(obj) {
-    return obj;
-  }
-
   function valueOf(obj) {
     var type = edn.typeOf(obj, options);
     if (type) {
       var f = options.values[type];
-      return f ? f(obj, deep ? valueOf : identity, valueOf) : obj;
+      return f ? f(obj, deep, valueOf) : obj;
     } else {
       return obj;
     }
@@ -1392,8 +1388,12 @@ edn.Keyword = (function () {
   };
 
   // Public: Get valueOf returns primitive array.
-  edn.values.list = function (ary, valueOf) {
-    return ary.slice(0).map(valueOf);
+  edn.values.list = function (ary, deep, valueOf) {
+    if (deep) {
+      return ary.map(valueOf);
+    } else {
+      return ary.slice(0);
+    }
   };
 
   // Public: Compare list collections.
@@ -1447,8 +1447,12 @@ edn.Keyword = (function () {
   };
 
   // Public: Get valueOf returns primitive array.
-  edn.values.vector = function (ary, valueOf) {
-    return ary.slice(0).map(valueOf);
+  edn.values.vector = function (ary, deep, valueOf) {
+    if (deep) {
+      return ary.map(valueOf);
+    } else {
+      return ary.slice(0);
+    }
   };
 
   // Public: Compare vector collections.
@@ -1704,15 +1708,17 @@ if (false && typeof Map !== 'undefined') {
   };
 
   // Public: Get valueOf returns primitive array.
-  edn.values.map = function (map, valueOf, _valueOf) {
+  edn.values.map = function (map, deep, valueOf) {
     var safe = map.keys.every(function (key) {
-      return typeof _valueOf(key) != 'object';
+      return typeof valueOf(key) != 'object';
     });
 
     if (safe) {
       var obj = {};
       map.items.forEach(function (item) {
-        obj[_valueOf(item[0])] = valueOf(item[1]);
+        var value = item[1];
+        if (deep) value = valueOf(value);
+        obj[valueOf(item[0])] = value;
       });
       return obj;
     }
@@ -1901,8 +1907,12 @@ if (false && typeof Set !== 'undefined') {
   };
 
   // Public: Get valueOf returns primitive array.
-  edn.values.set = function (set, valueOf) {
-    return set.values.map(valueOf);
+  edn.values.set = function (set, deep, valueOf) {
+    if (deep) {
+      return set.values.map(valueOf);
+    } else {
+      return set.values.slice(0);
+    }
   };
 
   // Public: Compare set collections.
@@ -2035,7 +2045,7 @@ edn.Unknown = (function () {
   };
 
   // Public: Get valueOf returns primitive array.
-  edn.values.unknown = function (obj, valueOf) {
+  edn.values.unknown = function (obj, deep, valueOf) {
     return valueOf(obj.element);
   };
 
