@@ -79,9 +79,10 @@ function compareValues(a, b) {
 //
 // a - Array
 // b - Array
+// isEqual - isEqual function
 //
 // Returns true if all collection values are equal.
-function compareArrayValues(a, b) {
+function compareArrayValues(a, b, isEqual) {
   var aLen = a.length;
   var bLen = b.length;
 
@@ -90,7 +91,7 @@ function compareArrayValues(a, b) {
   }
 
   for (var i = 0; i < aLen; i++) {
-    if (!edn.isEqual(a[i], b[i])) {
+    if (!isEqual(a[i], b[i])) {
       return false;
     }
   }
@@ -106,24 +107,36 @@ function compareArrayValues(a, b) {
 //
 // a - An edn value
 // b - Another edn value
+// options -
+//   converters - Conversion functions (default: edn.converters)
+//   types      - Type checker functions (default: edn.types)
+//   equal      - isEqual compare functions (default: edn.equal)
 //
 // Returns true if values are equal, otherwise false.
-edn.isEqual = function isEqual(a, b) {
-  a = edn.convert(a);
-  b = edn.convert(b);
+edn.isEqual = function (a, b, options) {
+  options = extendDefaultOptions(options);
 
-  var aType = edn.typeOf(a);
-  var bType = edn.typeOf(b);
+  function isEqual(a, b) {
+    a = edn.convert(a, options);
+    b = edn.convert(b, options);
 
-  var eq = edn.equal[aType];
+    var aType = edn.typeOf(a, options);
+    var bType = edn.typeOf(b, options);
 
-  if (aType !== bType) {
-    return false;
-  } else if (eq) {
-    return eq(a, b);
-  } else {
-    throw new Error("No equal function for type " + aType);
+    var eq = options.equal[aType];
+
+    if (a === b) {
+      return true;
+    } else if (aType !== bType) {
+      return false;
+    } else if (eq) {
+      return eq(a, b, isEqual);
+    } else {
+      throw new Error("No equal function for type " + aType);
+    }
   }
+
+  return isEqual(a, b);
 };
 
 // Internal: Registered object converter functions.
@@ -209,15 +222,26 @@ edn.typeOf = function (obj, options) {
 //
 // Returns new options Object.
 function extendDefaultOptions(options) {
-  if (!options) options = {};
+  if (options) {
+    // Recursive optimization if defaults have already been
+    // merged with user options.
+    if (options._defaults) {
+      return options;
+    }
+  } else {
+    options = {};
+  }
 
   var k, obj = {
+    _defaults: true,
     types: {},
-    converters: {}
+    converters: {},
+    equal: {}
   };
 
   extend(obj.types, edn.types, options.types);
   extend(obj.converters, edn.converters, options.converters);
+  extend(obj.equal, edn.equal, options.equal);
 
   return obj;
 }
@@ -1150,9 +1174,10 @@ if (false && typeof Map !== 'undefined') {
   //
   // a - map value
   // b - map value
+  // isEqual - isEqual function
   //
   // Returns true collection of values is equal.
-  edn.equal.map = function (a, b) {
+  edn.equal.map = function (a, b, isEqual) {
     var aItems = a.items;
     var bItems = b.items;
 
@@ -1162,11 +1187,11 @@ if (false && typeof Map !== 'undefined') {
 
     return aItems.every(function (aItem) {
       var bItem = bItems.filter(function (bItem) {
-        return edn.isEqual(aItem[0], bItem[0]);
+        return isEqual(aItem[0], bItem[0]);
       })[0];
 
       if (bItem) {
-        return edn.isEqual(aItem[1], bItem[1]);
+        return isEqual(aItem[1], bItem[1]);
       } else {
         return false;
       }
@@ -1329,9 +1354,10 @@ if (false && typeof Set !== 'undefined') {
   //
   // a - set value
   // b - set value
+  // isEqual - isEqual function
   //
   // Returns true collection of values is equal.
-  edn.equal.set = function (a, b) {
+  edn.equal.set = function (a, b, isEqual) {
     var aValues = a.values;
     var bValues = b.values;
 
@@ -1341,7 +1367,7 @@ if (false && typeof Set !== 'undefined') {
 
     return aValues.every(function (aValue) {
       return bValues.some(function (bValue) {
-        return edn.isEqual(aValue, bValue);
+        return isEqual(aValue, bValue);
       });
     });
   };
@@ -1456,10 +1482,11 @@ edn.Unknown = (function () {
   //
   // a - unknown value
   // b - unknown value
+  // isEqual - isEqual function
   //
   // Returns true if unknown tag and elements are equal.
-  edn.equal.unknown = function (a, b) {
-    return edn.isEqual(a.tag, b.tag) && edn.isEqual(a.element, b.element);
+  edn.equal.unknown = function (a, b, isEqual) {
+    return isEqual(a.tag, b.tag) && isEqual(a.element, b.element);
   };
 
   // Public: Register default handler for unknown tags.

@@ -395,5 +395,64 @@ exports.values = {
     test.ok(!edn.isEqual(p1, p3));
 
     test.done();
+  },
+
+  "person converter": function (test) {
+    function Person(first, last) {
+      this.first = first;
+      this.last  = last;
+    }
+    function isPerson(obj) {
+      return obj instanceof Person;
+    }
+    function convertPerson(p) {
+      return new edn.Unknown(
+        "myapp/Person",
+        {first: p.first, last: p.last}
+      );
+    }
+
+    var options = {
+      types: { "myapp/Person": isPerson },
+      converters: { "myapp/Person": convertPerson }
+    };
+
+    var p1 = new Person("Fred", "Mertz");
+    var p2 = new Person("Fred", "Mertz");
+    var p3 = new Person("Bob", "Mertz");
+
+    test.ok(edn.isEqual(p1, p1, options));
+    test.ok(edn.isEqual(p1, p2, options));
+    test.ok(!edn.isEqual(p1, p3, options));
+
+    test.done();
+  },
+
+  "person equal": function (test) {
+    function Person(first, last) {
+      this.first = first;
+      this.last  = last;
+    }
+    function isPerson(obj) {
+      return obj instanceof Person;
+    }
+    function equalPerson(a, b) {
+      return a.first == b.first && a.last == b.last;
+    }
+
+    var options = {
+      types: { "myapp/Person": isPerson },
+      equal: { "myapp/Person": equalPerson }
+    };
+
+    var p1 = new Person("Fred", "Mertz");
+    var p2 = new Person("Fred", "Mertz");
+    var p3 = new Person("Bob", "Mertz");
+
+    test.ok(edn.isEqual(p1, p1, options));
+    test.ok(edn.isEqual(p1, p2, options));
+    test.ok(!edn.isEqual(p1, p3, options));
+
+    test.done();
   }
 };
