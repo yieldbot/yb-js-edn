@@ -42,6 +42,10 @@ edn.stringify(["foo", edn.keyword('bar'), 123])
 // => '["foo" :bar 123]'
 ```
 
+## isEqual
+
+`edn.isEqual(a, b)` compares to objects using [edn semantics](https://github.com/edn-format/edn#equality). For the most part, two values will be equal if they serialize to the same edn string. With the expection of maps and sets which may serialize in a different order.
+
 ### types
 
 | type             | edn                  | js                                     |
