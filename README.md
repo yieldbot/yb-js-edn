@@ -27,7 +27,7 @@ curl -O https://raw.github.com/josh/js-edn/master/edn.js
 ``` javascript
 edn.parse('["foo", :bar, 123]')
 // => edn.vector([
-/       'foo',
+//      'foo',
 //      edn.keyword('bar'),
 //      123
 //    ])
