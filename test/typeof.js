@@ -155,5 +155,14 @@ exports.objects = {
     }));
 
     test.done();
+  },
+
+  "conflicted types": function (test) {
+    test.throws(function () {
+      edn.typeOf("foo", {
+        types: { 'string2': edn.types.string }
+      });
+    });
+    test.done();
   }
 };
