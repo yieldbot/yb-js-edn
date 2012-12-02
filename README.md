@@ -22,7 +22,7 @@ curl -O https://raw.github.com/josh/js-edn/master/edn.js
 
 ### parse
 
-`edn.parse` parses a String into primitive, tagged and wrapped objects. The returned value should contain all the original type information, so passing it into the stringify function, should yield an equivalent result.
+`edn.parse(str)` parses a String into primitive, tagged and wrapped objects. The returned value should contain all the original type information, so passing it into the stringify function, should yield an equivalent result.
 
 ``` javascript
 edn.parse('["foo" :bar 123]')
@@ -31,6 +31,15 @@ edn.parse('["foo" :bar 123]')
 //      edn.keyword('bar'),
 //      123
 //    ])
+```
+
+### stringify
+
+`edn.stringify(obj)` converts the object into an edn String.
+
+``` javascript
+edn.stringify(["foo", edn.keyword('bar'), 123])
+// => '["foo" :bar 123]'
 ```
 
 ### types
