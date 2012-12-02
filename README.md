@@ -57,6 +57,15 @@ edn.stringify(["foo", edn.keyword('bar'), 123])
 
 `edn.isEqual(a, b)` compares to objects using [edn semantics](https://github.com/edn-format/edn#equality). For the most part, two values will be equal if they serialize to the same edn string. With the expection of maps and sets which may serialize in a different order.
 
+### valueOf
+
+`edn.valueOf(obj)` attempts to convert the object to primitive values. The returned value will be lossy since tagged objects are discarded for the primitive version. For an example, lists and vectors will be unwrapped into plain old Arrays making it impossible to know the original type. This violates the transitive property of the stringify function. However, built in types may be a little easier to operate on.
+
+``` javascript
+edn.valueOf(edn.parse('{:foo "bar", :pi 3.14}'))
+// => { foo: 'bar', pi: 3.14 }
+```
+
 ### types
 
 | type             | edn                  | js                                     |
