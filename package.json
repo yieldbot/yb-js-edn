@@ -1,6 +1,6 @@
 {
   "name": "edn",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "main": "./edn.js",
   "homepage": "https://github.com/josh/js-edn",
   "repository": {
