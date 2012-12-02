@@ -341,6 +341,7 @@ exports.map = {
     test.equal("bar", map.get("foo"));
     test.equal("life", map.get(42));
     test.equal("object", map.get(obj));
+    test.equal(undefined, map.get("missing"));
 
     test.done();
   },

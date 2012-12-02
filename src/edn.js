@@ -1028,7 +1028,7 @@ if (false && typeof Map !== 'undefined') {
     // there is none.
     Map.prototype.get = function (key) {
       var index = indexOfIdentical(this.keys, key);
-      return index < 0 ? 'undefined' : this.values[index];
+      return index < 0 ? undefined : this.values[index];
     };
 
     // Public: Check if key is associated to a value in the map.
