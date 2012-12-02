@@ -67,6 +67,41 @@ edn.stringify = function (obj, options) {
   }
 };
 
+edn.values = {};
+
+// Public: Attempts to get primitive value of edn value.
+//
+// The returned value will be lossy. For an example, lists and vectors
+// will be unwrapped into plain old Arrays making it impossible to
+// know the original type.
+//
+// obj     - edn Object
+// deep    - Recursive (default: true)
+// options -
+//   values - valueOf functions (default: edn.values)
+//
+// Returns value.
+edn.valueOf = function (obj, deep, options) {
+  if (deep == void 0) deep = true;
+  options = extendDefaultOptions(options);
+
+  function identity(obj) {
+    return obj;
+  }
+
+  function valueOf(obj) {
+    var type = edn.typeOf(obj, options);
+    if (type) {
+      var f = options.values[type];
+      return f ? f(obj, deep ? valueOf : identity) : obj;
+    } else {
+      return obj;
+    }
+  }
+
+  return valueOf(obj);
+};
+
 // Public: Registered equality functions.
 //
 // Maps key type names to a isEqual function.
@@ -216,6 +251,7 @@ function extendDefaultOptions(options) {
     _defaults: true,
     types: {},
     converters: {},
+    values: {},
     equal: {},
     printers: {},
     tags: {}
@@ -223,6 +259,7 @@ function extendDefaultOptions(options) {
 
   extend(obj.types, edn.types, options.types);
   extend(obj.converters, edn.converters, options.converters);
+  extend(obj.values, edn.values, options.values);
   extend(obj.equal, edn.equal, options.equal);
   extend(obj.printers, edn.printers, options.printers);
   extend(obj.tags, edn.tags, options.tags);
@@ -280,6 +317,15 @@ function compareArrayValues(a, b, isEqual) {
   }
 
   return true;
+}
+
+// Internal: Invoke object's valueOf function.
+//
+// obj - Object
+//
+// Return value.
+function valueOf(obj) {
+  return obj.valueOf();
 }
 
 // Make Object#toString available
@@ -468,12 +514,10 @@ edn.Character = (function () {
     }
   };
 
+  // Public: Get valueOf returns primitive string.
+  edn.values.character = valueOf;
+
   // Public: Compare character values.
-  //
-  // a - character value
-  // b - character value
-  //
-  // Returns true if values are equal.
   edn.equal.character = compareValues;
 
   // Public: Alias for Character function.
@@ -634,6 +678,9 @@ edn.Symbol = (function () {
     return symbol.toString();
   };
 
+  // Public: Get valueOf returns primitive string.
+  edn.values.symbol = valueOf;
+
   // Public: Compare symbol values.
   //
   // a - symbol value
@@ -755,6 +802,9 @@ edn.Keyword = (function () {
   edn.printers.keyword = function (keyword) {
     return keyword.toString();
   };
+
+  // Public: Get valueOf returns primitive string.
+  edn.values.keyword = valueOf;
 
   // Public: Compare keyword values.
   //
@@ -886,6 +936,11 @@ edn.Keyword = (function () {
     return '(' + ary.map(edn.stringify).join(' ') + ')';
   };
 
+  // Public: Get valueOf returns primitive array.
+  edn.values.list = function (ary, valueOf) {
+    return ary.slice(0).map(valueOf);
+  };
+
   // Public: Compare list collections.
   //
   // a - list value
@@ -934,6 +989,11 @@ edn.Keyword = (function () {
   // Returns String.
   edn.printers.vector = function (ary) {
     return '[' + ary.map(edn.stringify).join(' ') + ']';
+  };
+
+  // Public: Get valueOf returns primitive array.
+  edn.values.vector = function (ary, valueOf) {
+    return ary.slice(0).map(valueOf);
   };
 
   // Public: Compare vector collections.
@@ -1188,6 +1248,23 @@ if (false && typeof Map !== 'undefined') {
     return "{" + m.join(", ") + "}";
   };
 
+  // Public: Get valueOf returns primitive array.
+  edn.values.map = function (map, valueOf) {
+    var safe = map.keys.every(function (key) {
+      return typeof valueOf(key) != 'object';
+    });
+
+    if (safe) {
+      var obj = {};
+      map.items.forEach(function (item) {
+        obj[valueOf(item[0])] = item[1];
+      });
+      return obj;
+    }
+
+    return map;
+  };
+
   // Public: Compare map collections.
   //
   // a - map value
@@ -1368,6 +1445,11 @@ if (false && typeof Set !== 'undefined') {
     return "#{" + set.values.map(edn.stringify).join(" ") + "}";
   };
 
+  // Public: Get valueOf returns primitive array.
+  edn.values.set = function (set, valueOf) {
+    return set.values.map(valueOf);
+  };
+
   // Public: Compare set collections.
   //
   // a - set value
@@ -1495,6 +1577,11 @@ edn.Unknown = (function () {
   // Returns String.
   edn.printers.unknown = function (obj) {
     return "#" + obj.tag + " " + edn.stringify(obj.element);
+  };
+
+  // Public: Get valueOf returns primitive array.
+  edn.values.unknown = function (obj, valueOf) {
+    return valueOf(obj.element);
   };
 
   // Public: Compare unknown value.
