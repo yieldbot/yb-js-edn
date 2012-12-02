@@ -158,7 +158,7 @@ exports.objects = {
     test.done();
   },
 
-  "unknown": function (test) {
+  "generic": function (test) {
     var p = new edn.Map();
     p.set(edn.Keyword('first'), "Fred");
     p.set(edn.Keyword('last'), "Mertz");
@@ -167,10 +167,10 @@ exports.objects = {
       edn.stringify(p)
     );
 
-    var unknown = new edn.Unknown(edn.Symbol('myapp/Person'), p);
+    p = edn.generic(edn.Symbol('myapp/Person'), p);
     test.equal(
       '#myapp/Person {:first "Fred", :last "Mertz"}',
-      edn.stringify(unknown)
+      edn.stringify(p)
     );
     test.done();
   },
@@ -217,7 +217,7 @@ exports.objects = {
       this.last  = last;
     }
     Person.prototype.asEDN = function () {
-      return edn.Unknown("myapp/Person", {first: this.first, last: this.last});
+      return edn.generic("myapp/Person", {first: this.first, last: this.last});
     };
 
     var p = new Person("Fred", "Mertz");
@@ -265,7 +265,7 @@ exports.objects = {
       return obj instanceof Person;
     }
     function convertPerson(p) {
-      return new edn.Unknown(
+      return edn.generic(
         "myapp/Person",
         {first: p.first, last: p.last}
       );

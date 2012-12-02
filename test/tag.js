@@ -46,9 +46,9 @@ exports.tag = {
     test.done();
   },
 
-  "unknown": function (test) {
+  "generic": function (test) {
     test.deepEqual(
-      edn.Unknown("myapp/Person", "Bob"),
+      edn.generic("myapp/Person", "Bob"),
       edn.dispatchTag("myapp/Person", "Bob")
     );
     test.done();

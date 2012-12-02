@@ -578,7 +578,7 @@ edn.isEqual = function (a, b, options) {
 // Examples
 //
 //     edn.converters['myapp/Person'] = function (person) {
-//       return edn.Unknown('myapp/Person', {name: person.name});
+//       return edn.generic('myapp/Person', {name: person.name});
 //     }
 //
 edn.converters = {};
@@ -1978,7 +1978,7 @@ edn.tags = {};
 // element returning a new value.
 //
 // Otherwise, the default handler will be invoked which will return an
-// Unknown object wrapper. If `edn.tags.default` is set to null, an
+// Generic object wrapper. If `edn.tags.default` is set to null, an
 // error will be throw instead.
 //
 // Returns a value or raises an error if theres no tag handler.
@@ -1997,14 +1997,14 @@ edn.dispatchTag = function (tag, element, options) {
 // Expose tag to parser
 parser.yy.Tag = edn.dispatchTag;
 
-edn.Unknown = (function () {
-  // Public: Create a new Unknown object.
+edn.Generic = (function () {
+  // Public: Create a new Generic object.
   //
   // tag     - Symbol tag
   // element - Any value
-  function Unknown(tag, element) {
-    if (!(this instanceof Unknown)) {
-      return new Unknown(tag, element);
+  function Generic(tag, element) {
+    if (!(this instanceof Generic)) {
+      return new Generic(tag, element);
     }
 
     if (!(tag instanceof edn.Symbol)) {
@@ -2023,66 +2023,69 @@ edn.Unknown = (function () {
   // Public: Get primitive string value.
   //
   // Returns String.
-  Unknown.prototype.valueOf = function () {
+  Generic.prototype.valueOf = function () {
     return this.element;
   };
 
   // Public: String representation of the UUID.
   //
   // Returns String.
-  Unknown.prototype.toString = function () {
-    return '[object Unknown]';
+  Generic.prototype.toString = function () {
+    return '[object Generic]';
   };
 
   // Internal: Node.js console.log inspect printer.
   //
   // Returns String.
-  Unknown.prototype.inspect = function () {
-    return "[edn.Unknown " + this.tag + " " +
+  Generic.prototype.inspect = function () {
+    return "[edn.Generic " + this.tag + " " +
       require('util').inspect(this.element) + "]";
   };
 
-  // Public: Register typeof check for Unknown.
+  // Public: Register typeof check for Generic.
   //
   // obj - Any value
   //
-  // Returns true if object is a Unknown, otherwise false.
-  edn.types.unknown = function (obj) {
-    return obj instanceof Unknown;
+  // Returns true if object is a Generic, otherwise false.
+  edn.types.generic = function (obj) {
+    return obj instanceof Generic;
   };
 
-  // Public: Stringify Unknown object.
+  // Public: Stringify Generic object.
   //
-  // obj - Unknown object
+  // obj - Generic object
   //
   // Returns String.
-  edn.printers.unknown = function (obj) {
+  edn.printers.generic = function (obj) {
     return "#" + obj.tag + " " + edn.stringify(obj.element);
   };
 
   // Public: Get valueOf returns primitive array.
-  edn.values.unknown = function (obj, deep, valueOf) {
+  edn.values.generic = function (obj, deep, valueOf) {
     return valueOf(obj.element);
   };
 
-  // Public: Compare unknown value.
+  // Public: Compare generic value.
   //
-  // a - unknown value
-  // b - unknown value
+  // a - generic value
+  // b - generic value
   // isEqual - isEqual function
   //
-  // Returns true if unknown tag and elements are equal.
-  edn.equal.unknown = function (a, b, isEqual) {
+  // Returns true if tag and elements are equal.
+  edn.equal.generic = function (a, b, isEqual) {
     return isEqual(a.tag, b.tag) && isEqual(a.element, b.element);
   };
 
-  // Public: Register default handler for unknown tags.
+  // Public: Register default handler for generic tags.
   //
   // tag     - Symbol tag
   // element - Any value
-  edn.tags.default = Unknown;
+  edn.tags.default = Generic;
 
-  return Unknown;
+  // Public: Alias for Generic function.
+  edn.generic = Generic;
+
+  return Generic;
 })();
 
 
@@ -2118,9 +2121,9 @@ edn.Unknown = (function () {
   //
   // date - Date object
   //
-  // Returns an Unknown object.
+  // Returns an Generic object.
   edn.converters.inst = function (date) {
-    return edn.Unknown('inst', date.toISOString());
+    return edn.generic('inst', date.toISOString());
   };
 })();
 
@@ -2193,9 +2196,9 @@ edn.UUID = (function () {
   //
   // uuid - UUID object
   //
-  // Returns an Unknown object.
+  // Returns an Generic object.
   edn.converters.uuid = function (uuid) {
-    return edn.Unknown('uuid', uuid.value);
+    return edn.generic('uuid', uuid.value);
   };
 
   // Public: Alias for UUID function.

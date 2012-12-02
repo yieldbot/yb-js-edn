@@ -383,7 +383,7 @@ exports.values = {
       this.last  = last;
     }
     Person.prototype.asEDN = function () {
-      return edn.Unknown("myapp/Person", {first: this.first, last: this.last});
+      return edn.generic("myapp/Person", {first: this.first, last: this.last});
     };
 
     var p1 = new Person("Fred", "Mertz");
@@ -406,7 +406,7 @@ exports.values = {
       return obj instanceof Person;
     }
     function convertPerson(p) {
-      return new edn.Unknown(
+      return edn.generic(
         "myapp/Person",
         {first: p.first, last: p.last}
       );

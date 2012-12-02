@@ -116,7 +116,7 @@ exports.parse = {
     test.done();
   },
 
-  "unknown": function (test) {
+  "generic": function (test) {
     test.deepEqual(
       {first: "Fred", last: "Mertz"},
       edn.valueOf(edn.parse('#myapp/Person {:first "Fred", :last "Mertz"}'))

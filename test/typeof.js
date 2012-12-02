@@ -115,13 +115,13 @@ exports.objects = {
     test.done();
   },
 
-  "unknown": function (test) {
+  "generic": function (test) {
     var p = new edn.Map();
     p.set(edn.Keyword('first'), "Fred");
     p.set(edn.Keyword('last'), "Mertz");
 
-    var unknown = new edn.Unknown(edn.Symbol('myapp/Person'), p);
-    test.equal('unknown', edn.typeOf(unknown));
+    p = edn.generic(edn.Symbol('myapp/Person'), p);
+    test.equal('generic', edn.typeOf(p));
     test.done();
   },
 

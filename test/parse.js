@@ -128,10 +128,10 @@ exports.parse = {
     test.done();
   },
 
-  "unknown tag": function (test) {
+  "generic tag": function (test) {
     var t;
 
-    t = edn.Unknown('myapp/Person', edn.map([
+    t = edn.generic('myapp/Person', edn.map([
       edn.keyword('first'), "Fred",
       edn.keyword('last'), "Mertz"
     ]));

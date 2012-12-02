@@ -640,14 +640,14 @@ exports.uuid = {
   }
 };
 
-exports.unknown = {
+exports.generic = {
   "function": function (test) {
     var p = new edn.Map();
     p.set(edn.Keyword('first'), "Fred");
     p.set(edn.Keyword('last'), "Mertz");
 
-    var unknown = edn.Unknown(edn.Symbol('myapp/Person'), p);
-    test.ok(unknown instanceof edn.Unknown);
+    var generic = edn.Generic(edn.Symbol('myapp/Person'), p);
+    test.ok(generic instanceof edn.Generic);
     test.done();
   },
 
@@ -656,22 +656,22 @@ exports.unknown = {
     p.set(edn.Keyword('first'), "Fred");
     p.set(edn.Keyword('last'), "Mertz");
 
-    var unknown = new edn.Unknown(edn.Symbol('myapp/Person'), p);
-    test.ok(unknown instanceof edn.Unknown);
+    var generic = new edn.Generic(edn.Symbol('myapp/Person'), p);
+    test.ok(generic instanceof edn.Generic);
     test.done();
   },
 
   "tag symbol": function (test) {
-    var unknown = new edn.Unknown(edn.Symbol('myapp/Person'), null);
-    test.equal(edn.Symbol('myapp/Person'), unknown.tag);
-    test.equal('symbol', edn.typeOf(unknown.tag));
+    var generic = new edn.Generic(edn.Symbol('myapp/Person'), null);
+    test.equal(edn.Symbol('myapp/Person'), generic.tag);
+    test.equal('symbol', edn.typeOf(generic.tag));
     test.done();
   },
 
   "tag string": function (test) {
-    var unknown = new edn.Unknown('myapp/Person', null);
-    test.equal(edn.Symbol('myapp/Person'), unknown.tag);
-    test.equal('symbol', edn.typeOf(unknown.tag));
+    var generic = new edn.Generic('myapp/Person', null);
+    test.equal(edn.Symbol('myapp/Person'), generic.tag);
+    test.equal('symbol', edn.typeOf(generic.tag));
     test.done();
   },
 
@@ -680,8 +680,8 @@ exports.unknown = {
     p.set(edn.Keyword('first'), "Fred");
     p.set(edn.Keyword('last'), "Mertz");
 
-    var unknown = new edn.Unknown(edn.Symbol('myapp/Person'), p);
-    test.equal(p, unknown.element);
+    var generic = new edn.Generic(edn.Symbol('myapp/Person'), p);
+    test.equal(p, generic.element);
     test.done();
   },
 
@@ -690,8 +690,8 @@ exports.unknown = {
     p.set(edn.Keyword('first'), "Fred");
     p.set(edn.Keyword('last'), "Mertz");
 
-    var unknown = new edn.Unknown(edn.Symbol('myapp/Person'), p);
-    test.equal(p, unknown.valueOf());
+    var generic = new edn.Generic(edn.Symbol('myapp/Person'), p);
+    test.equal(p, generic.valueOf());
     test.done();
   },
 
@@ -700,9 +700,9 @@ exports.unknown = {
     p.set(edn.Keyword('first'), "Fred");
     p.set(edn.Keyword('last'), "Mertz");
 
-    var unknown = new edn.Unknown(edn.Symbol('myapp/Person'), p);
-    test.equal("[object Unknown]", unknown.toString());
-    test.equal('string', typeof unknown.toString());
+    var generic = new edn.Generic(edn.Symbol('myapp/Person'), p);
+    test.equal("[object Generic]", generic.toString());
+    test.equal('string', typeof generic.toString());
     test.done();
   }
 };
