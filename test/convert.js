@@ -24,7 +24,7 @@ exports.objects = {
     test.done();
   },
 
-  "person": function (test) {
+  "person as edn": function (test) {
     function Person(first, last) {
       this.first = first;
       this.last  = last;
@@ -43,6 +43,36 @@ exports.objects = {
     test.deepEqual(
       new edn.Unknown("myapp/Person", {first: "Fred", last: "Mertz"}),
       edn.convert(p)
+    );
+
+    test.done();
+  },
+
+  "person converter": function (test) {
+    function Person(first, last) {
+      this.first = first;
+      this.last  = last;
+    }
+    var p = new Person("Fred", "Mertz");
+
+    function isPerson(obj) {
+      return obj instanceof Person;
+    }
+    function convertPerson(p) {
+      return new edn.Unknown(
+        "myapp/Person",
+        {first: p.first, last: p.last}
+      );
+    }
+
+    test.throws(function () { edn.convert(p); });
+
+    test.deepEqual(
+      new edn.Unknown("myapp/Person", {first: "Fred", last: "Mertz"}),
+      edn.convert(p, {
+        types: { "myapp/Person": isPerson },
+        converters: { "myapp/Person": convertPerson }
+      })
     );
 
     test.done();

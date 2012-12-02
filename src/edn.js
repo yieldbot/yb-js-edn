@@ -133,22 +133,31 @@ edn.isEqual = function isEqual(a, b) {
 //
 // Examples
 //
-//     edn.types['myapp/Person'] = function (person) {
+//     edn.converters['myapp/Person'] = function (person) {
 //       return edn.Unknown('myapp/Person', {name: person.name});
 //     }
 //
 edn.converters = {};
 
-edn.convert = function (obj) {
+// Internal: Attempt to convert object to EDN value.
+//
+// obj     - Object
+// options -
+//   converters - Conversion functions (default: edn.converters)
+//   types      - Type checker functions (default: edn.types)
+//
+// Returns EDN value.
+edn.convert = function (obj, options) {
+  options = extendDefaultOptions(options);
   if (obj && obj.asEDN) {
     return obj.asEDN();
   } else {
-    var type = edn.typeOf(obj);
+    var type = edn.typeOf(obj, options);
     if (type) {
-      var f = edn.converters[type];
+      var f = options.converters[type];
       return f ? f(obj) : obj;
     } else {
-      throw new Error("No converter function for object " + obj);
+      throw new Error("No type for object " + obj);
     }
   }
 };
@@ -203,10 +212,12 @@ function extendDefaultOptions(options) {
   if (!options) options = {};
 
   var k, obj = {
-    types: {}
+    types: {},
+    converters: {}
   };
 
   extend(obj.types, edn.types, options.types);
+  extend(obj.converters, edn.converters, options.converters);
 
   return obj;
 }
