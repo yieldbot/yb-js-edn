@@ -328,13 +328,13 @@ var toString = Object.prototype.toString;
 // nil represents nil, null or nothing. It should be read as an object
 // with similar meaning on the target platform.
 (function () {
-  // Public: Register typeof check for undefined or null.
+  // Public: Register typeof check for null.
   //
   // obj - Any value
   //
-  // Returns true if object is undefined or null, otherwise false.
+  // Returns true if object is null, otherwise false.
   edn.types.nil = function (obj) {
-    return obj === void 0 || obj === null;
+    return obj === null;
   };
 
   // Public: Stringify nil.
@@ -352,6 +352,22 @@ var toString = Object.prototype.toString;
   // Always returns true since two nil types are always equal.
   edn.equal.nil = function (a, b) {
     return true;
+  };
+
+  // Public: Register typeof check for undefined.
+  //
+  // obj - Any value
+  //
+  // Returns true if object is undefined, otherwise false.
+  edn.types.undefined = function (obj) {
+    return obj === void 0;
+  };
+
+  // Public: Convert undefined to null.
+  //
+  // Returns null.
+  edn.converters.undefined = function () {
+    return null;
   };
 })();
 

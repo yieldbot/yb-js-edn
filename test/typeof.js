@@ -4,7 +4,7 @@ var edn = require('../edn');
 
 exports.primitives = {
   "undefined": function (test) {
-    test.equal('nil', edn.typeOf(undefined));
+    test.equal('undefined', edn.typeOf(undefined));
     test.done();
   },
 
