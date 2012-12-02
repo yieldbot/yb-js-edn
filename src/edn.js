@@ -93,7 +93,7 @@ edn.valueOf = function (obj, deep, options) {
     var type = edn.typeOf(obj, options);
     if (type) {
       var f = options.values[type];
-      return f ? f(obj, deep ? valueOf : identity) : obj;
+      return f ? f(obj, deep ? valueOf : identity, valueOf) : obj;
     } else {
       return obj;
     }
@@ -1249,15 +1249,15 @@ if (false && typeof Map !== 'undefined') {
   };
 
   // Public: Get valueOf returns primitive array.
-  edn.values.map = function (map, valueOf) {
+  edn.values.map = function (map, valueOf, _valueOf) {
     var safe = map.keys.every(function (key) {
-      return typeof valueOf(key) != 'object';
+      return typeof _valueOf(key) != 'object';
     });
 
     if (safe) {
       var obj = {};
       map.items.forEach(function (item) {
-        obj[valueOf(item[0])] = item[1];
+        obj[_valueOf(item[0])] = valueOf(item[1]);
       });
       return obj;
     }

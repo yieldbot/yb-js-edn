@@ -88,6 +88,14 @@ exports.parse = {
       {1: 2, 3: 4},
       edn.valueOf(edn.parse('{1 2, 3 4}'))
     );
+    test.deepEqual(
+      {foo: 'bar'},
+      edn.valueOf(edn.parse('{:foo :bar}'))
+    );
+    test.deepEqual(
+      {foo: edn.keyword('bar')},
+      edn.valueOf(edn.parse('{:foo :bar}'), false)
+    );
 
     var arrayMap = new edn.Map();
     arrayMap.set([1, 2, 3], 4);
