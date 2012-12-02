@@ -657,32 +657,30 @@ edn.typeOf = function (obj, options) {
 //
 // Returns new options Object.
 function extendDefaultOptions(options) {
-  if (options) {
-    // Recursive optimization if defaults have already been
-    // merged with user options.
-    if (options._defaults) {
-      return options;
-    }
-  } else {
-    options = {};
+  // Recursive optimization if defaults have already been
+  // merged with user options.
+  if (options && options._defaults) {
+    return options;
   }
 
-  var k, obj = {
+  var obj = {
     _defaults: true,
-    types: {},
-    converters: {},
-    values: {},
-    equal: {},
-    printers: {},
-    tags: {}
+    types: Object.create(edn.types),
+    converters: Object.create(edn.converters),
+    values: Object.create(edn.values),
+    equal: Object.create(edn.equal),
+    printers: Object.create(edn.printers),
+    tags: Object.create(edn.tags)
   };
 
-  extend(obj.types, edn.types, options.types);
-  extend(obj.converters, edn.converters, options.converters);
-  extend(obj.values, edn.values, options.values);
-  extend(obj.equal, edn.equal, options.equal);
-  extend(obj.printers, edn.printers, options.printers);
-  extend(obj.tags, edn.tags, options.tags);
+  if (options) {
+    extend(obj.types, options.types);
+    extend(obj.converters, options.converters);
+    extend(obj.values, options.values);
+    extend(obj.equal, options.equal);
+    extend(obj.printers, options.printers);
+    extend(obj.tags, options.tags);
+  }
 
   return obj;
 }
@@ -690,19 +688,13 @@ function extendDefaultOptions(options) {
 // Internal: Copy object properties onto target object.
 //
 // target - Target Object
-// obj1   - Object to copy from
-// obj2   - Another Object to copy from
+// source - Source Object to copy from
 //
-// Returns target Object.
-function extend(target, obj1, obj2) {
+// Returns nothing.
+function extend(target, source) {
   var k;
-  for (k in obj1) {
-    target[k] = obj1[k];
-  }
-  for (k in obj2) {
-    target[k] = obj2[k];
-  }
-  return target;
+  for (k in source)
+    target[k] = source[k];
 }
 
 // Internal: Compare valueOf objects.
