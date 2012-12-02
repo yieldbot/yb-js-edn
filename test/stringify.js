@@ -227,5 +227,59 @@ exports.objects = {
     );
 
     test.done();
+  },
+
+  "person printer": function (test) {
+    function Person(first, last) {
+      this.first = first;
+      this.last  = last;
+    }
+    function isPerson(obj) {
+      return obj instanceof Person;
+    }
+    function printPerson(p) {
+      return [
+        "#myapp/Person",
+        edn.stringify({first: p.first, last: p.last})
+      ].join(" ");
+    }
+
+    var p = new Person("Fred", "Mertz");
+    test.equal(
+      '#myapp/Person {:first "Fred", :last "Mertz"}',
+      edn.stringify(p, {
+        types: { "myapp/Person": isPerson },
+        printers: { "myapp/Person": printPerson }
+      })
+    );
+
+    test.done();
+  },
+
+  "person converter": function (test) {
+    function Person(first, last) {
+      this.first = first;
+      this.last  = last;
+    }
+    function isPerson(obj) {
+      return obj instanceof Person;
+    }
+    function convertPerson(p) {
+      return new edn.Unknown(
+        "myapp/Person",
+        {first: p.first, last: p.last}
+      );
+    }
+
+    var p = new Person("Fred", "Mertz");
+    test.equal(
+      '#myapp/Person {:first "Fred", :last "Mertz"}',
+      edn.stringify(p, {
+        types: { "myapp/Person": isPerson },
+        converters: { "myapp/Person": convertPerson }
+      })
+    );
+
+    test.done();
   }
 };

@@ -32,19 +32,25 @@ edn.printers = {};
 // Public: Convert Object to edn String.
 //
 // obj - Object
+// options -
+//   printers   - Printer functions (default: edn.printers)
+//   converters - Conversion functions (default: edn.converters)
+//   types      - Type checker functions (default: edn.types)
 //
 // Returns edn String.
-edn.stringify = function (obj) {
+edn.stringify = function (obj, options) {
+  options = extendDefaultOptions(options);
+
   if (obj && obj.toEDN) {
     return obj.toEDN();
   }
-  obj = edn.convert(obj);
+  obj = edn.convert(obj, options);
 
-  var type = edn.typeOf(obj);
+  var type = edn.typeOf(obj, options);
   if (type) {
-    var printer = edn.printers[type];
+    var printer = options.printers[type];
     if (printer) {
-      return edn.printers[type](obj);
+      return printer(obj);
     } else {
       throw new Error("No printer function for type " + type);
     }
@@ -74,9 +80,9 @@ edn.equal = {};
 // a - An edn value
 // b - Another edn value
 // options -
+//   equal      - isEqual compare functions (default: edn.equal)
 //   converters - Conversion functions (default: edn.converters)
 //   types      - Type checker functions (default: edn.types)
-//   equal      - isEqual compare functions (default: edn.equal)
 //
 // Returns true if values are equal, otherwise false.
 edn.isEqual = function (a, b, options) {
@@ -202,12 +208,14 @@ function extendDefaultOptions(options) {
     _defaults: true,
     types: {},
     converters: {},
-    equal: {}
+    equal: {},
+    printers: {}
   };
 
   extend(obj.types, edn.types, options.types);
   extend(obj.converters, edn.converters, options.converters);
   extend(obj.equal, edn.equal, options.equal);
+  extend(obj.printers, edn.printers, options.printers);
 
   return obj;
 }
