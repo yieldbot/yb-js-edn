@@ -169,16 +169,17 @@ edn.types = {};
 //
 // Used internally for looking up printers and tag converters.
 //
-// obj   - Object to detect type of
-// types - Type checker functions (default: edn.types)
+// obj     - Object to detect type of
+// options -
+//   types - Type checker functions (default: edn.types)
 //
 // Returns type String or null;
-edn.typeOf = function (obj, types) {
-  types = extend({}, edn.types, types || {});
+edn.typeOf = function (obj, options) {
+  options = extendDefaultOptions(options);
   var matchedTypes = [];
 
-  for (var type in types) {
-    if (types[type](obj)) {
+  for (var type in options.types) {
+    if (options.types[type](obj)) {
       matchedTypes.push(type);
     }
   }
@@ -193,8 +194,22 @@ edn.typeOf = function (obj, types) {
   }
 };
 
-// Make Object#toString available
-var toString = Object.prototype.toString;
+// Internal: Merge user options with defaults.
+//
+// options - User options Object
+//
+// Returns new options Object.
+function extendDefaultOptions(options) {
+  if (!options) options = {};
+
+  var k, obj = {
+    types: {}
+  };
+
+  extend(obj.types, edn.types, options.types);
+
+  return obj;
+}
 
 // Internal: Copy object properties onto target object.
 //
@@ -213,6 +228,9 @@ function extend(target, obj1, obj2) {
   }
   return target;
 }
+
+// Make Object#toString available
+var toString = Object.prototype.toString;
 
 
 // Built-in Elements

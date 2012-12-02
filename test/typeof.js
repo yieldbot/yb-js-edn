@@ -147,8 +147,10 @@ exports.objects = {
     test.equal(null, edn.typeOf(p));
 
     test.equal('myapp/Person', edn.typeOf(p, {
-      'myapp/Person': function (obj) {
-        return obj instanceof Person;
+      types: {
+        'myapp/Person': function (obj) {
+          return obj instanceof Person;
+        }
       }
     }));
 
