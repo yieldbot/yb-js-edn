@@ -164,6 +164,33 @@ exports.parse = {
     test.done();
   },
 
+  "person tag": function (test) {
+    function Person(first, last) {
+      this.first = first;
+      this.last  = last;
+    }
+    function toPerson(attrs) {
+      return new Person(
+        attrs.get(edn.keyword('first')),
+        attrs.get(edn.keyword('last'))
+      );
+    }
+
+    var attrs = new edn.Map();
+    attrs.set(edn.keyword('first'), "Fred");
+    attrs.set(edn.keyword('last'), "Mertz");
+
+    test.deepEqual(
+      new Person("Fred", "Mertz"),
+      edn.parse(
+        '#myapp/Person {:first "Fred", :last "Mertz"}',
+        { tags: { 'myapp/Person': toPerson } }
+      )
+    );
+
+    test.done();
+  },
+
   "discard": function (test) {
     var v;
 

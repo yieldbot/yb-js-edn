@@ -142,5 +142,5 @@ EdnSet
     ;
 
 EdnTag
-    : TAG EdnValue { $$ = yy.Tag($1.substr(1), $2); }
+    : TAG EdnValue { $$ = yy.Tag($1.substr(1), $2, yy.options); }
     ;

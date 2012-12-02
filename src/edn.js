@@ -8,12 +8,20 @@ if (typeof exports !== 'undefined') {
 }
 
 
+// Internal: Jison Parser constructor.
+function Parser() {}
+Parser.prototype = parser;
+
 // Public: Parse edn String.
 //
 // str - edn String
+// options -
+//   tags - Tag dispatch functions (default: edn.tags)
 //
 // Returns a value.
-edn.parse = function (str) {
+edn.parse = function (str, options) {
+  var parser = new Parser();
+  parser.yy.options = extendDefaultOptions(options);
   return parser.parse(str);
 };
 
@@ -209,13 +217,15 @@ function extendDefaultOptions(options) {
     types: {},
     converters: {},
     equal: {},
-    printers: {}
+    printers: {},
+    tags: {}
   };
 
   extend(obj.types, edn.types, options.types);
   extend(obj.converters, edn.converters, options.converters);
   extend(obj.equal, edn.equal, options.equal);
   extend(obj.printers, edn.printers, options.printers);
+  extend(obj.tags, edn.tags, options.tags);
 
   return obj;
 }
@@ -1409,12 +1419,13 @@ edn.tags = {};
 // error will be throw instead.
 //
 // Returns a value or raises an error if theres no tag handler.
-edn.dispatchTag = function (tag, element) {
-  var f = edn.tags[tag];
+edn.dispatchTag = function (tag, element, options) {
+  options = extendDefaultOptions(options);
+  var f = options.tags[tag];
   if (f) {
     return f(element);
-  } else if (edn.tags.default) {
-    return edn.tags.default(tag, element);
+  } else if (options.tags.default) {
+    return options.tags.default(tag, element);
   } else {
     throw new Error("No reader function for tag " + tag);
   }
