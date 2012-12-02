@@ -78,7 +78,7 @@ exports.parse = {
   "lists": function (test) {
     var l;
 
-    l = edn.list([edn.symbol('a'), edn.symbol('b'), 42]);
+    l = edn.list([edn.symbol('a'), edn.symbol('b'), edn.integer(42)]);
     test.deepEqual(l, edn.parse('(a b 42)'));
 
     test.throws(function () { edn.parse('(missing paren'); });
@@ -89,7 +89,7 @@ exports.parse = {
   "vectors": function (test) {
     var v;
 
-    v = edn.vector([edn.symbol('a'), edn.symbol('b'), 42]);
+    v = edn.vector([edn.symbol('a'), edn.symbol('b'), edn.integer(42)]);
     test.deepEqual(v, edn.parse('[a b 42]'));
 
     test.throws(function () { edn.parse('[missing bracket'); });
@@ -101,9 +101,9 @@ exports.parse = {
     var m;
 
     m = edn.map([
-      edn.keyword('a'), 1,
+      edn.keyword('a'), edn.integer(1),
       "foo", edn.keyword('bar'),
-      edn.vector([1, 2, 3]),
+      edn.vector([edn.integer(1), edn.integer(2), edn.integer(3)]),
       edn.symbol('four')
     ]);
     test.deepEqual(m, edn.parse('{:a 1, "foo" :bar, [1 2 3] four}'));
@@ -194,7 +194,7 @@ exports.parse = {
   "discard": function (test) {
     var v;
 
-    v = edn.vector([edn.symbol('a'), edn.symbol('b'), 42]);
+    v = edn.vector([edn.symbol('a'), edn.symbol('b'), edn.integer(42)]);
     test.deepEqual(v, edn.parse('[a b #_foo 42]'));
     test.deepEqual(v, edn.parse('[a b #_ foo 42]'));
     test.deepEqual(v, edn.parse('[a b #_[1, 2, 3] 42]'));

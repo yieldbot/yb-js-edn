@@ -830,14 +830,33 @@ edn.Keyword = (function () {
 // have the suffix N to indicate that arbitrary precision is desired.
 // -0 is a valid integer not distinct from 0.
 (function () {
+  // Public: Tag Number as a integer type.
+  //
+  // n - Number
+  //
+  // Returns new Number.
+  edn.integer = function (n) {
+    // Skip tagging integers
+    // n = Object(n);
+    // n.type = 'integer';
+    return n;
+  };
+
+  // Expose Integer to parser
+  parser.yy.Integer = edn.integer;
+
   // Public: Register typeof check for Integer.
   //
   // obj - Any value
   //
   // Returns true if object is a Integer, otherwise false.
   edn.types.integer = function (obj) {
-    return (toString.call(obj) === '[object Number]') &&
-      Math.floor(obj) == obj;
+    if (obj && obj.type) {
+      return obj.type == 'integer';
+    } else {
+      return (toString.call(obj) === '[object Number]') &&
+        Math.floor(obj) == obj;
+    }
   };
 
   // Public: Stringify Integer object.
@@ -848,6 +867,9 @@ edn.Keyword = (function () {
   edn.printers.integer = function (n) {
     return n.toString();
   };
+
+  // Public: Get valueOf returns primitive number.
+  edn.values.integer = valueOf;
 
   // Public: Compare integer values.
   //
@@ -865,14 +887,32 @@ edn.Keyword = (function () {
 // In addition, a floating-point number may have the suffix M to
 // indicate that exact precision is desired.
 (function () {
+  // Public: Tag Number as a float type.
+  //
+  // n - Number
+  //
+  // Returns new Number.
+  edn.float = function (n) {
+    n = Object(n);
+    n.type = 'float';
+    return n;
+  };
+
+  // Expose Integer to parser
+  parser.yy.Float = edn.float;
+
   // Public: Register typeof check for Float.
   //
   // obj - Any value
   //
   // Returns true if object is a Float, otherwise false.
   edn.types.float = function (obj) {
-    return (toString.call(obj) === '[object Number]') &&
-      Math.floor(obj) != obj;
+    if (obj && obj.type) {
+      return obj.type == 'float';
+    } else {
+      return (toString.call(obj) === '[object Number]') &&
+        Math.floor(obj) != obj;
+    }
   };
 
   // Public: Stringify Float object.
@@ -885,6 +925,9 @@ edn.Keyword = (function () {
     if (!/\./.test(s)) s += ".0";
     return s;
   };
+
+  // Public: Get valueOf returns primitive number.
+  edn.values.float = valueOf;
 
   // Public: Compare float values.
   //

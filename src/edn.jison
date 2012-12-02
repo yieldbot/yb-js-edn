@@ -114,11 +114,11 @@ EdnKeyword
     ;
 
 EdnInteger
-    : INTEGER { $$ = parseInt(yytext); }
+    : INTEGER { $$ = yy.Integer(parseInt(yytext)); }
     ;
 
 EdnFloat
-    : FLOAT { $$ = parseFloat(yytext); }
+    : FLOAT { $$ = yy.Float(parseFloat(yytext)); }
     ;
 
 EdnList

@@ -53,7 +53,7 @@ exports.parse = {
       edn.valueOf(edn.parse('(a b 42)'))
     );
     test.deepEqual(
-      [edn.Symbol('a'), edn.Symbol('b'), 42],
+      [edn.Symbol('a'), edn.Symbol('b'), edn.integer(42)],
       edn.valueOf(edn.parse('(a b 42)'), false)
     );
     test.done();
@@ -65,7 +65,7 @@ exports.parse = {
       edn.valueOf(edn.parse('[a b 42]'))
     );
     test.deepEqual(
-      [edn.Symbol('a'), edn.Symbol('b'), 42],
+      [edn.Symbol('a'), edn.Symbol('b'), edn.integer(42)],
       edn.valueOf(edn.parse('[a b 42]'), false)
     );
     test.done();
