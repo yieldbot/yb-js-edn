@@ -1,65 +1,53 @@
-"use strict";
+/*jshint expr: true*/
 
-var edn = require('../edn');
+'use strict';
 
-exports.tag = {
-  "inst": function (test) {
-    test.deepEqual(
-      new Date(Date.parse("1985-04-12T23:20:50.52Z")),
-      edn.dispatchTag("inst", "1985-04-12T23:20:50.52Z")
-    );
-    test.done();
-  },
+var edn = require('../edn'),
+    expect = require('chai').expect;
 
-  "uuid": function (test) {
-    test.deepEqual(
-      edn.uuid("f81d4fae-7dec-11d0-a765-00a0c91e6bf6"),
-      edn.dispatchTag("uuid", "f81d4fae-7dec-11d0-a765-00a0c91e6bf6")
-    );
-    test.done();
-  },
+describe('dispatchTag', function () {
 
-  "person": function (test) {
+  it('should handle inst', function (done) {
+    expect(edn.dispatchTag('inst', '1985-04-12T23:20:50.52Z')).to.deep.equal(new Date(Date.parse('1985-04-12T23:20:50.52Z')));
+    done();
+  });
+
+  it('should handle uuid', function (done) {
+    expect(edn.dispatchTag('uuid', 'f81d4fae-7dec-11d0-a765-00a0c91e6bf6')).to.deep.equal(edn.uuid('f81d4fae-7dec-11d0-a765-00a0c91e6bf6'));
+    done();
+  });
+
+  it('should handle person', function (done) {
     function Person(first, last) {
       this.first = first;
       this.last  = last;
     }
     function toPerson(attrs) {
       return new Person(
-        attrs.get(edn.keyword('first')),
-        attrs.get(edn.keyword('last'))
+          attrs.get(edn.keyword('first')),
+          attrs.get(edn.keyword('last'))
       );
     }
 
     var attrs = new edn.Map();
-    attrs.set(edn.keyword('first'), "Fred");
-    attrs.set(edn.keyword('last'), "Mertz");
+    attrs.set(edn.keyword('first'), 'Fred');
+    attrs.set(edn.keyword('last'), 'Mertz');
 
-    test.deepEqual(
-      new Person("Fred", "Mertz"),
-      edn.dispatchTag(
-        "myapp/Person", attrs,
-        { tags: { 'myapp/Person': toPerson } }
-      )
-    );
+    expect(edn.dispatchTag('myapp/Person', attrs, { tags: { 'myapp/Person': toPerson } } )).to.deep.equal(new Person('Fred', 'Mertz'));
+    done();
+  });
 
-    test.done();
-  },
+  it('should handle generic', function (done) {
+    expect(edn.dispatchTag('myapp/Person', 'Bob')).to.deep.equal(edn.generic('myapp/Person', 'Bob'));
+    done();
+  });
 
-  "generic": function (test) {
-    test.deepEqual(
-      edn.generic("myapp/Person", "Bob"),
-      edn.dispatchTag("myapp/Person", "Bob")
-    );
-    test.done();
-  },
-
-  "throw": function (test) {
-    test.throws(function () {
-      edn.dispatchTag("myapp/Person", "Bob", {
+  it('should throw', function (done) {
+    expect(function () {
+      edn.dispatchTag('myapp/Person', 'Bob', {
         tags: { default: null }
-      });
-    });
-    test.done();
-  }
-};
+      });}).to.throw(Error);
+    done();
+  });
+
+});

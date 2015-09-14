@@ -1,206 +1,154 @@
-"use strict";
+/*jshint expr: true*/
 
-var edn = require('../edn');
+'use strict';
 
-exports.parse = {
-  "nil": function (test) {
-    test.equal(null, edn.parse('nil'));
-    test.done();
-  },
+var edn = require('../edn'),
+    chai = require('chai'),
+    expect = chai.expect;
+/* jshint ignore:start */
+var assert = chai.assert;
+/* jshint ignore:end */
 
-  "booleans": function (test) {
-    test.equal(true, edn.parse('true'));
-    test.equal(false, edn.parse('false'));
-    test.done();
-  },
+describe('parse', function () {
+  it('should parse nil', function (done) {
+    expect(edn.parse('nil')).to.equal(null);
+    done();
+  });
 
-  "strings": function (test) {
-    test.equal("double quotes", edn.parse('"double quotes"'));
-    test.throws(function () { edn.parse('"missing quote'); });
-    test.done();
-  },
+  it('should parse booleans', function (done) {
+    expect(edn.parse('true')).to.equal(true);
+    expect(edn.parse('false')).to.equal(false);
+    done();
+  });
 
-  "characters": function (test) {
-    var c;
+  it('should parse strings', function (done) {
+    expect(edn.parse('"double quotes"')).to.equal('double quotes');
+    expect(function () { edn.parse('"missing quote'); }).to.throw(Error);
+    done();
+  });
 
-    c = edn.character("c");
-    test.equal(c, edn.parse('\\c'));
+  it('should parse characters', function (done) {
+    expect(edn.parse('\\c')).to.equal(edn.character('c'));
+    expect(edn.parse('\\newline')).to.equal(edn.character('\n'));
+    expect(edn.parse('\\return')).to.equal(edn.character('\r'));
+    expect(edn.parse('\\space')).to.equal(edn.character(' '));
+    expect(edn.parse('\\tab')).to.equal(edn.character('\t'));
+    expect(function () { edn.parse('"missing quote'); }).to.throw(Error);
+    done();
+  });
 
-    c = edn.character("\n");
-    test.equal(c, edn.parse('\\newline'));
+  it('should parse symbols', function (done) {
+    expect(edn.parse('foo')).to.equal(edn.Symbol('foo'));
+    expect(edn.parse('my-namespace/foo')).to.equal(edn.Symbol('my-namespace/foo'));
+    done();
+  });
 
-    c = edn.character("\r");
-    test.equal(c, edn.parse('\\return'));
+  it('should parse keywords', function (done) {
+    expect(edn.parse(':fred')).to.equal(edn.keyword('fred'));
+    expect(edn.parse(':my/fred')).to.equal(edn.keyword('my/fred'));
+    done();
+  });
 
-    c = edn.character(" ");
-    test.equal(c, edn.parse('\\space'));
+  it('should parse integers', function (done) {
+    expect(edn.parse('0')).to.equal(0);
+    expect(edn.parse('9')).to.equal(9);
+    expect(edn.parse('42')).to.equal(42);
+    expect(edn.parse('-1')).to.equal(-1);
+    done();
+  });
 
-    c = edn.character("\t");
-    test.equal(c, edn.parse('\\tab'));
+  it('should parse floating point numbers', function (done) {
+    /* jshint ignore:start */
+    assert(edn.parse('3.14') == 3.14, 'not strctly equal');
+    assert(edn.parse('9.0') == 9.0, 'not strctly equal');
+    /* jshint ignore:end */
+    done();
+  });
 
-    test.throws(function () { edn.parse('\\abc'); });
+  it('should parse lists', function (done) {
+    expect(edn.parse('(a b 42)')).to.deep.equal(edn.list([edn.symbol('a'), edn.symbol('b'), edn.integer(42)]));
+    expect(function () { edn.parse('(missing paren'); }).to.throw(Error);
+    done();
+  });
 
-    test.done();
-  },
+  it('should parse vectors', function (done) {
+    expect(edn.parse('[a b 42]')).to.deep.equal(edn.vector([edn.symbol('a'), edn.symbol('b'), edn.integer(42)]));
+    expect(function () { edn.parse('[missing bracket'); }).to.throw(Error);
+    done();
+  });
 
-  "symbols": function (test) {
-    test.equal(edn.Symbol('foo'), edn.parse('foo'));
-    test.equal(edn.symbol('my-namespace/foo'), edn.parse('my-namespace/foo'));
-    test.done();
-  },
+  it('should parse maps', function (done) {
+    expect(edn.parse('{:a 1, "foo" :bar, [1 2 3] four}')).to.deep
+        .equal(edn.map([
+          edn.keyword('a'), edn.integer(1),
+          'foo', edn.keyword('bar'),
+          edn.vector([edn.integer(1), edn.integer(2), edn.integer(3)]),
+          edn.symbol('four')
+        ]));
+    expect(function () { edn.parse('[missing brace'); }).to.throw(Error);
+    done();
+  });
 
-  "keywords": function (test) {
-    var k;
+  it('should parse sets', function (done) {
+    expect(edn.parse('#{a b [1 2 3]}')).to.deep
+        .equal(edn.set([
+          edn.symbol('a'),
+          edn.symbol('b'),
+          edn.vector([1, 2, 3]),
+        ]));
+    expect(function () { edn.parse('#{missing brace'); }).to.throw(Error);
+    done();
+  });
 
-    k = edn.keyword("fred");
-    test.equal(k, edn.parse(':fred'));
+  it('should parse generic tag', function (done) {
+    expect(edn.parse('#myapp/Person {:first "Fred", :last "Mertz"}')).to.deep
+        .equal(edn.generic('myapp/Person', edn.map([
+          edn.keyword('first'), 'Fred',
+          edn.keyword('last'), 'Mertz'
+        ])));
+    done();
+  });
 
-    k = edn.keyword("my/fred");
-    test.equal(k, edn.parse(':my/fred'));
+  it('should parse inst tag', function (done) {
+    expect(edn.parse('#inst "1985-04-12T23:20:50.52Z"')).to.deep
+        .equal(new Date(Date.parse('1985-04-12T23:20:50.52Z')));
+    done();
+  });
 
-    test.done();
-  },
+  it('should parse uuid tag', function (done) {
+    expect(edn.parse('#uuid "f81d4fae-7dec-11d0-a765-00a0c91e6bf6"')).to.deep
+        .equal(edn.uuid('f81d4fae-7dec-11d0-a765-00a0c91e6bf6'));
+    done();
+  });
 
-  "integers": function (test) {
-    test.equal(0, edn.parse('0'));
-    test.equal(9, edn.parse('9'));
-    test.equal(42, edn.parse('42'));
-    test.equal(-1, edn.parse('-1'));
-    test.done();
-  },
-
-  "floating point numbers": function (test) {
-    test.equal(3.14, edn.parse('3.14'));
-    test.equal(9.0, edn.parse('9.0'));
-    test.done();
-  },
-
-  "lists": function (test) {
-    var l;
-
-    l = edn.list([edn.symbol('a'), edn.symbol('b'), edn.integer(42)]);
-    test.deepEqual(l, edn.parse('(a b 42)'));
-
-    test.throws(function () { edn.parse('(missing paren'); });
-
-    test.done();
-  },
-
-  "vectors": function (test) {
-    var v;
-
-    v = edn.vector([edn.symbol('a'), edn.symbol('b'), edn.integer(42)]);
-    test.deepEqual(v, edn.parse('[a b 42]'));
-
-    test.throws(function () { edn.parse('[missing bracket'); });
-
-    test.done();
-  },
-
-  "maps": function (test) {
-    var m;
-
-    m = edn.map([
-      edn.keyword('a'), edn.integer(1),
-      "foo", edn.keyword('bar'),
-      edn.vector([edn.integer(1), edn.integer(2), edn.integer(3)]),
-      edn.symbol('four')
-    ]);
-    test.deepEqual(m, edn.parse('{:a 1, "foo" :bar, [1 2 3] four}'));
-
-    test.throws(function () { edn.parse('{missing brace'); });
-
-    test.done();
-  },
-
-  "sets": function (test) {
-    var s;
-
-    s = edn.set([
-      edn.symbol('a'),
-      edn.symbol('b'),
-      edn.vector([1, 2, 3]),
-    ]);
-    test.deepEqual(s, edn.parse('#{a b [1 2 3]}'));
-
-    test.throws(function () { edn.parse('#{missing brace'); });
-
-    test.done();
-  },
-
-  "generic tag": function (test) {
-    var t;
-
-    t = edn.generic('myapp/Person', edn.map([
-      edn.keyword('first'), "Fred",
-      edn.keyword('last'), "Mertz"
-    ]));
-    test.deepEqual(
-      t,
-      edn.parse('#myapp/Person {:first "Fred", :last "Mertz"}')
-    );
-
-    test.done();
-  },
-
-  "inst tag": function (test) {
-    var t = new Date(Date.parse("1985-04-12T23:20:50.52Z"));
-    test.deepEqual(t, edn.parse('#inst "1985-04-12T23:20:50.52Z"'));
-
-    test.done();
-  },
-
-  "uuid tag": function (test) {
-    var t;
-
-    t = edn.uuid("f81d4fae-7dec-11d0-a765-00a0c91e6bf6");
-    test.deepEqual(
-      t,
-      edn.parse('#uuid "f81d4fae-7dec-11d0-a765-00a0c91e6bf6"')
-    );
-
-    test.done();
-  },
-
-  "person tag": function (test) {
+  it('should parse person tag', function (done) {
     function Person(first, last) {
       this.first = first;
       this.last  = last;
     }
     function toPerson(attrs) {
       return new Person(
-        attrs.get(edn.keyword('first')),
-        attrs.get(edn.keyword('last'))
+          attrs.get(edn.keyword('first')),
+          attrs.get(edn.keyword('last'))
       );
     }
 
-    var attrs = new edn.Map();
-    attrs.set(edn.keyword('first'), "Fred");
-    attrs.set(edn.keyword('last'), "Mertz");
-
-    test.deepEqual(
-      new Person("Fred", "Mertz"),
-      edn.parse(
+    expect(edn.parse(
         '#myapp/Person {:first "Fred", :last "Mertz"}',
         { tags: { 'myapp/Person': toPerson } }
-      )
-    );
+    )).to.deep
+        .equal(new Person('Fred', 'Mertz'));
+    done();
+  });
 
-    test.done();
-  },
+  it('should discard', function (done) {
+    var v = edn.vector([edn.symbol('a'), edn.symbol('b'), edn.integer(42)]);
 
-  "discard": function (test) {
-    var v;
+    expect(edn.parse('[a b #_foo 42]')).to.deep.equal(v);
+    expect(edn.parse('[a b #_ foo 42]')).to.deep.equal(v);
+    expect(edn.parse('[a b #_[1, 2, 3] 42]')).to.deep.equal(v);
+    expect(edn.parse('[a b #_ [1, 2, 3] 42]')).to.deep.equal(v);
+    done();
+  });
 
-    v = edn.vector([edn.symbol('a'), edn.symbol('b'), edn.integer(42)]);
-    test.deepEqual(v, edn.parse('[a b #_foo 42]'));
-    test.deepEqual(v, edn.parse('[a b #_ foo 42]'));
-    test.deepEqual(v, edn.parse('[a b #_[1, 2, 3] 42]'));
-    test.deepEqual(v, edn.parse('[a b #_ [1, 2, 3] 42]'));
-
-    v = edn.vector([]);
-    test.deepEqual(v, edn.parse('[#_foo]'));
-
-    test.done();
-  }
-};
+});

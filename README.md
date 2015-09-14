@@ -21,6 +21,20 @@ Via npm.
 npm install git://github.com/josh/js-edn.git
 ```
 
+### To build
+
+Install required modules
+
+```
+npm install
+```
+
+Run lint, build new edn.js file, run tests.
+
+```
+npm run build
+```
+
 **NOTE** At the moment, this package is not officially published to npm. I don't have any long term plans of maintaining this package.
 
 For use in a browser, you can just download the [edn.js](https://github.com/josh/js-edn/blob/master/edn.js) file. There aren't any external dependencies.

@@ -7,16 +7,23 @@
     "type": "git",
     "url": "git://github.com/josh/js-edn.git"
   },
-  "licenses": [{
-    "type": "MIT",
-    "url": "https://raw.github.com/josh/js-edn/master/LICENSE"
-  }],
+  "licenses": [
+    {
+      "type": "MIT",
+      "url": "https://raw.github.com/baldmountain/js-edn/master/LICENSE"
+    }
+  ],
   "devDependencies": {
-    "jison": "0.3.12",
+    "chai": "^3.2.0",
+    "istanbul": "^0.3.19",
+    "jison": "^0.4.15",
     "jshint": "latest",
-    "nodeunit": "latest"
+    "mocha": "^2.3.2"
   },
   "scripts": {
-    "test": "make test"
+    "lint": "jshint src/*.js test/*.js",
+    "test": "istanbul cover _mocha -- test/**.js",
+    "edn.js": "echo \"(function() {\n\" > edn.js && ./node_modules/.bin/jison -m js -o parser.js~ ./src/edn.jison && cat parser.js~ >> edn.js && rm parser.js~ && cat ./src/edn.js >> edn.js && echo \"})();\n\" >> edn.js",
+    "build": "npm run lint && npm run edn.js && npm run test"
   }
 }

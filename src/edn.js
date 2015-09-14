@@ -1,16 +1,61 @@
-/*global parser:true */
-"use strict";
+/* globals parser, Map, Set */
+'use strict';
 
-if (typeof exports !== 'undefined') {
-  var edn = exports;
-} else {
-  var edn = window.edn = {};
-}
-
+var edn = module.exports;
 
 // Internal: Jison Parser constructor.
-function Parser() {}
+function Parser() {
+}
 Parser.prototype = parser;
+
+// Internal: Copy object properties onto target object.
+//
+// target - Target Object
+// source - Source Object to copy from
+//
+// Returns nothing.
+function extend(target, source) {
+  var k;
+  for (k in source) {
+    if (source.hasOwnProperty(k)) {
+      target[k] = source[k];
+    }
+  }
+}
+
+// Internal: Merge user options with defaults.
+//
+// options - User options Object
+//
+// Returns new options Object.
+function extendDefaultOptions(options) {
+  // Recursive optimization if defaults have already been
+  // merged with user options.
+  if (options && options._defaults) {
+    return options;
+  }
+
+  var obj = {
+    _defaults: true,
+    types: Object.create(edn.types),
+    converters: Object.create(edn.converters),
+    values: Object.create(edn.values),
+    equal: Object.create(edn.equal),
+    printers: Object.create(edn.printers),
+    tags: Object.create(edn.tags)
+  };
+
+  if (options) {
+    extend(obj.types, options.types);
+    extend(obj.converters, options.converters);
+    extend(obj.values, options.values);
+    extend(obj.equal, options.equal);
+    extend(obj.printers, options.printers);
+    extend(obj.tags, options.tags);
+  }
+
+  return obj;
+}
 
 // Public: Parse edn String.
 //
@@ -60,10 +105,10 @@ edn.stringify = function (obj, options) {
     if (printer) {
       return printer(obj);
     } else {
-      throw new Error("No printer function for type " + type);
+      throw new Error('No printer function for type ' + type);
     }
   } else {
-    throw new Error("No printer function for object " + obj);
+    throw new Error('No printer function for object ' + obj);
   }
 };
 
@@ -82,7 +127,7 @@ edn.values = {};
 //
 // Returns value.
 edn.valueOf = function (obj, deep, options) {
-  if (deep == void 0) deep = true;
+  if (deep === void 0) deep = true;
   options = extendDefaultOptions(options);
 
   function valueOf(obj) {
@@ -143,7 +188,7 @@ edn.isEqual = function (a, b, options) {
     } else if (eq) {
       return eq(a, b, isEqual);
     } else {
-      throw new Error("No equal function for type " + aType);
+      throw new Error('No equal function for type ' + aType);
     }
   }
 
@@ -181,7 +226,7 @@ edn.convert = function (obj, options) {
       var f = options.converters[type];
       return f ? f(obj) : obj;
     } else {
-      throw new Error("No type for object " + obj);
+      throw new Error('No type for object ' + obj);
     }
   }
 };
@@ -217,61 +262,15 @@ edn.typeOf = function (obj, options) {
     }
   }
 
-  if (matchedTypes.length == 1) {
+  if (matchedTypes.length === 1) {
     return matchedTypes[0];
   } else if (matchedTypes.length > 1) {
     throw new Error(
-      "Conflicted types " + matchedTypes.join(', ') + " for object " + obj);
+        'Conflicted types ' + matchedTypes.join(', ') + ' for object ' + obj);
   } else {
     return null;
   }
 };
-
-// Internal: Merge user options with defaults.
-//
-// options - User options Object
-//
-// Returns new options Object.
-function extendDefaultOptions(options) {
-  // Recursive optimization if defaults have already been
-  // merged with user options.
-  if (options && options._defaults) {
-    return options;
-  }
-
-  var obj = {
-    _defaults: true,
-    types: Object.create(edn.types),
-    converters: Object.create(edn.converters),
-    values: Object.create(edn.values),
-    equal: Object.create(edn.equal),
-    printers: Object.create(edn.printers),
-    tags: Object.create(edn.tags)
-  };
-
-  if (options) {
-    extend(obj.types, options.types);
-    extend(obj.converters, options.converters);
-    extend(obj.values, options.values);
-    extend(obj.equal, options.equal);
-    extend(obj.printers, options.printers);
-    extend(obj.tags, options.tags);
-  }
-
-  return obj;
-}
-
-// Internal: Copy object properties onto target object.
-//
-// target - Target Object
-// source - Source Object to copy from
-//
-// Returns nothing.
-function extend(target, source) {
-  var k;
-  for (k in source)
-    target[k] = source[k];
-}
 
 // Internal: Compare valueOf objects.
 //
@@ -280,7 +279,7 @@ function extend(target, source) {
 //
 // Returns true if values are equal, otherwise false.
 function compareValues(a, b) {
-  return a.valueOf() == b.valueOf();
+  return a.valueOf() === b.valueOf();
 }
 
 // Internal: Compare Array objects.
@@ -294,7 +293,7 @@ function compareArrayValues(a, b, isEqual) {
   var aLen = a.length;
   var bLen = b.length;
 
-  if (aLen != bLen) {
+  if (aLen !== bLen) {
     return false;
   }
 
@@ -341,7 +340,7 @@ var toString = Object.prototype.toString;
   //
   // Returns String.
   edn.printers.nil = function () {
-    return "nil";
+    return 'nil';
   };
 
   // Public: Compare nil values.
@@ -350,7 +349,7 @@ var toString = Object.prototype.toString;
   // b - nil value
   //
   // Always returns true since two nil types are always equal.
-  edn.equal.nil = function (a, b) {
+  edn.equal.nil = function () {
     return true;
   };
 
@@ -392,7 +391,7 @@ var toString = Object.prototype.toString;
   //
   // Returns String.
   edn.printers.boolean = function (bool) {
-    return bool.valueOf() ? "true" : "false";
+    return bool.valueOf() ? 'true' : 'false';
   };
 
   // Public: Compare boolean values.
@@ -406,7 +405,7 @@ var toString = Object.prototype.toString;
 
 // Strings
 //
-// Strings are enclosed in "double quotes". May span multiple lines.
+// Strings are enclosed in 'double quotes'. May span multiple lines.
 // Standard C/Java escape characters \t \r \n are supported.
 (function () {
   // Public: Register typeof check for string.
@@ -484,7 +483,7 @@ edn.Character = (function () {
   //
   // Returns String.
   Character.prototype.inspect = function () {
-    return "[edn.Character " + require('util').inspect(this.char) + "]";
+    return '[edn.Character ' + require('util').inspect(this.char) + ']';
   };
 
   // Public: Register typeof check for Character.
@@ -505,16 +504,16 @@ edn.Character = (function () {
     char = char.valueOf();
 
     switch (char) {
-    case "\n":
-      return "\\newline";
-    case "\r":
-      return "\\return";
-    case " ":
-      return "\\space";
-    case "\t":
-      return "\\tab";
-    default:
-      return "\\" + char[0];
+      case '\n':
+        return '\\newline';
+      case '\r':
+        return '\\return';
+      case ' ':
+        return '\\space';
+      case '\t':
+        return '\\tab';
+      default:
+        return '\\' + char[0];
     }
   };
 
@@ -564,7 +563,7 @@ edn.Symbol = (function () {
   // constructor always returns a new object. The function call is the
   // prefered api.
   //
-  // nsname - String with "/" seperating the name and namespace
+  // nsname - String with '/' seperating the name and namespace
   //
   // or
   //
@@ -578,7 +577,9 @@ edn.Symbol = (function () {
       var sym = pool[nsname];
 
       if (!sym) {
+        /* jshint ignore:start */
         sym = new Symbol(namespace, name);
+        /* jshint ignore:end */
         // Interned symbols are immutable
         Object.freeze(sym);
         pool[sym.valueOf()] = sym;
@@ -598,7 +599,7 @@ edn.Symbol = (function () {
 
   // Internal: Return seperated namespace and name.
   //
-  // nsname - String with "/" seperating the name and namespace
+  // nsname - String with '/' seperating the name and namespace
   //
   // or
   //
@@ -611,9 +612,9 @@ edn.Symbol = (function () {
       return [namespace, name];
     } else {
       var parts = namespace.split('/', 2);
-      if (namespace == '/') {
+      if (namespace === '/') {
         return [null, '/'];
-      } else if (parts.length == 2) {
+      } else if (parts.length === 2) {
         return parts;
       } else {
         return [null, parts[0]];
@@ -623,7 +624,7 @@ edn.Symbol = (function () {
 
   // Internal: Join namespace and name.
   //
-  // nsname - String with "/" seperating the name and namespace
+  // nsname - String with '/' seperating the name and namespace
   //
   // or
   //
@@ -661,7 +662,7 @@ edn.Symbol = (function () {
   //
   // Returns String.
   Symbol.prototype.inspect = function () {
-    return "[edn.Symbol " + this.toString() + "]";
+    return '[edn.Symbol ' + this.toString() + ']';
   };
 
   // Public: Register typeof check for Symbol.
@@ -724,7 +725,7 @@ edn.Keyword = (function () {
   // constructor always returns a new object. The function call is the
   // prefered api.
   //
-  // nsname - String with "/" seperating the name and namespace
+  // nsname - String with '/' seperating the name and namespace
   //
   // or
   //
@@ -779,14 +780,14 @@ edn.Keyword = (function () {
   //
   // Returns String.
   Keyword.prototype.toString = function () {
-    return ":" + this.symbol.toString();
+    return ':' + this.symbol.toString();
   };
 
   // Internal: Node.js console.log inspect printer.
   //
   // Returns String.
   Keyword.prototype.inspect = function () {
-    return "[edn.Keyword " + this.toString() + "]";
+    return '[edn.Keyword ' + this.toString() + ']';
   };
 
   // Public: Register typeof check for Keyword.
@@ -856,10 +857,12 @@ edn.Keyword = (function () {
   // Returns true if object is a Integer, otherwise false.
   edn.types.integer = function (obj) {
     if (obj && obj.type) {
-      return obj.type == 'integer';
+      return obj.type === 'integer';
     } else {
+      /* jshint ignore:start */
       return (toString.call(obj) === '[object Number]') &&
-        Math.floor(obj) == obj;
+          Math.floor(obj) == obj;
+      /* jshint ignore:end */
     }
   };
 
@@ -912,10 +915,12 @@ edn.Keyword = (function () {
   // Returns true if object is a Float, otherwise false.
   edn.types.float = function (obj) {
     if (obj && obj.type) {
-      return obj.type == 'float';
+      return obj.type === 'float';
     } else {
+      /* jshint ignore:start */
       return (toString.call(obj) === '[object Number]') &&
-        Math.floor(obj) != obj;
+          Math.floor(obj) != obj;
+      /* jshint ignore:end */
     }
   };
 
@@ -926,7 +931,7 @@ edn.Keyword = (function () {
   // Returns String.
   edn.printers.float = function (n) {
     var s = n.toString();
-    if (!/\./.test(s)) s += ".0";
+    if (!/\./.test(s)) s += '.0';
     return s;
   };
 
@@ -971,7 +976,7 @@ edn.Keyword = (function () {
   // Returns true if object is a List, otherwise false.
   edn.types.list = function (obj) {
     return toString.call(obj) === '[object Array]' &&
-      obj.type === 'list';
+        obj.type === 'list';
   };
 
   // Public: Stringify Array/List object.
@@ -1030,7 +1035,7 @@ edn.Keyword = (function () {
   // Returns true if object is a Vector, otherwise false.
   edn.types.vector = function (obj) {
     return toString.call(obj) === '[object Array]' &&
-      obj.type === 'vector';
+        obj.type === 'vector';
   };
 
   // Public: Stringify Vector object.
@@ -1066,7 +1071,7 @@ edn.Keyword = (function () {
   // Returns true if object is a Array, otherwise false.
   edn.types.array = function (obj) {
     return toString.call(obj) === '[object Array]' &&
-      typeof obj.type == 'undefined';
+        typeof obj.type === 'undefined';
   };
 
   // Public: Convert Array to Vector object.
@@ -1086,7 +1091,7 @@ edn.Keyword = (function () {
 // curly braces {}. Each key should appear at most once. No semantics
 // should be associated with the order in which the pairs appear.
 //
-// {:a 1, "foo" :bar, [1 2 3] four}
+// {:a 1, 'foo' :bar, [1 2 3] four}
 //
 // Note that keys and values can be elements of any type. The use of
 // commas above is optional, as they are parsed as whitespace.
@@ -1192,7 +1197,7 @@ if (false && typeof Map !== 'undefined') {
     //
     // key - Object
     //
-    // Returns the value associated to the key. Or "undefined" if
+    // Returns the value associated to the key. Or 'undefined' if
     // there is none.
     Map.prototype.get = function (key) {
       var index = indexOfIdentical(this.keys, key);
@@ -1219,7 +1224,6 @@ if (false && typeof Map !== 'undefined') {
       var keys = this.keys;
       var values = this.values;
       var items = this.items;
-      var _map = this._map;
       var index = indexOfIdentical(keys, key);
       if (index < 0) index = keys.length;
       keys[index] = key;
@@ -1238,7 +1242,6 @@ if (false && typeof Map !== 'undefined') {
       var keys = this.keys;
       var values = this.values;
       var items = this.items;
-      var _map = this._map;
       var index = indexOfIdentical(keys, key);
       if (index < 0) return false;
       keys.splice(index, 1);
@@ -1258,7 +1261,7 @@ if (false && typeof Map !== 'undefined') {
     //
     // Returns String.
     Map.prototype.inspect = function () {
-      return "[edn.Map " + require('util').inspect(this.items) + "]";
+      return '[edn.Map ' + require('util').inspect(this.items) + ']';
     };
 
     return Map;
@@ -1298,15 +1301,15 @@ if (false && typeof Map !== 'undefined') {
   // Returns String.
   edn.printers.map = function (map) {
     var m = map.items.map(function (item) {
-      return edn.stringify(item[0]) + " " + edn.stringify(item[1]);
+      return edn.stringify(item[0]) + ' ' + edn.stringify(item[1]);
     });
-    return "{" + m.join(", ") + "}";
+    return '{' + m.join(', ') + '}';
   };
 
   // Public: Get valueOf returns primitive array.
   edn.values.map = function (map, deep, valueOf) {
     var safe = map.keys.every(function (key) {
-      return typeof valueOf(key) != 'object';
+      return typeof valueOf(key) !== 'object';
     });
 
     if (safe) {
@@ -1333,7 +1336,7 @@ if (false && typeof Map !== 'undefined') {
     var aItems = a.items;
     var bItems = b.items;
 
-    if (aItems.length != bItems.length) {
+    if (aItems.length !== bItems.length) {
       return false;
     }
 
@@ -1358,7 +1361,7 @@ if (false && typeof Map !== 'undefined') {
   // otherwise false.
   edn.types.object = function (obj) {
     return obj && (typeof obj === 'object') &&
-      (Object.getPrototypeOf(obj) === Object.prototype);
+        (Object.getPrototypeOf(obj) === Object.prototype);
   };
 
   // Public: Convert Object to and EDN map.
@@ -1413,7 +1416,9 @@ if (false && typeof Set !== 'undefined') {
       Object.defineProperty(this, 'values', {
         configurable: false,
         enumerable: false,
-        get: function () { return this._map.keys; }
+        get: function () {
+          return this._map.keys;
+        }
       });
     }
 
@@ -1458,7 +1463,7 @@ if (false && typeof Set !== 'undefined') {
     //
     // Returns String.
     Set.prototype.inspect = function () {
-      return "[edn.Set " + require('util').inspect(this.values) + "]";
+      return '[edn.Set ' + require('util').inspect(this.values) + ']';
     };
 
     return Set;
@@ -1499,7 +1504,7 @@ if (false && typeof Set !== 'undefined') {
   //
   // Returns String.
   edn.printers.set = function (set) {
-    return "#{" + set.values.map(edn.stringify).join(" ") + "}";
+    return '#{' + set.values.map(edn.stringify).join(' ') + '}';
   };
 
   // Public: Get valueOf returns primitive array.
@@ -1522,7 +1527,7 @@ if (false && typeof Set !== 'undefined') {
     var aValues = a.values;
     var bValues = b.values;
 
-    if (aValues.length != bValues.length) {
+    if (aValues.length !== bValues.length) {
       return false;
     }
 
@@ -1570,7 +1575,7 @@ edn.dispatchTag = function (tag, element, options) {
   } else if (options.tags.default) {
     return options.tags.default(tag, element);
   } else {
-    throw new Error("No reader function for tag " + tag);
+    throw new Error('No reader function for tag ' + tag);
   }
 };
 
@@ -1618,8 +1623,8 @@ edn.Generic = (function () {
   //
   // Returns String.
   Generic.prototype.inspect = function () {
-    return "[edn.Generic " + this.tag + " " +
-      require('util').inspect(this.element) + "]";
+    return '[edn.Generic ' + this.tag + ' ' +
+        require('util').inspect(this.element) + ']';
   };
 
   // Public: Register typeof check for Generic.
@@ -1637,7 +1642,7 @@ edn.Generic = (function () {
   //
   // Returns String.
   edn.printers.generic = function (obj) {
-    return "#" + obj.tag + " " + edn.stringify(obj.element);
+    return '#' + obj.tag + ' ' + edn.stringify(obj.element);
   };
 
   // Public: Get valueOf returns primitive array.
@@ -1674,8 +1679,8 @@ edn.Generic = (function () {
 
 // Date built-in tagged element
 //
-// #inst "rfc-3339-format"
-// #inst "1985-04-12T23:20:50.52Z"
+// #inst 'rfc-3339-format'
+// #inst '1985-04-12T23:20:50.52Z'
 //
 // An instant in time. The tagged element is a string in RFC-3339 format.
 (function () {
@@ -1709,7 +1714,7 @@ edn.Generic = (function () {
 
 // UUID built-in tagged element
 //
-// #uuid "f81d4fae-7dec-11d0-a765-00a0c91e6bf6"
+// #uuid 'f81d4fae-7dec-11d0-a765-00a0c91e6bf6'
 //
 // A UUID. The tagged element is a canonical UUID string representation.
 edn.UUID = (function () {
@@ -1751,7 +1756,7 @@ edn.UUID = (function () {
   //
   // Returns String.
   UUID.prototype.inspect = function () {
-    return "[edn.UUID " + this.value + "]";
+    return '[edn.UUID ' + this.value + ']';
   };
 
   // Public: Convert 'uuid' tag to UUID object.

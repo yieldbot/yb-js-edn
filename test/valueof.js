@@ -1,127 +1,89 @@
-"use strict";
+/*jshint expr: true*/
+'use strict';
 
-var edn = require('../edn');
+var edn = require('../edn'),
+    expect = require('chai').expect;
 
-exports.parse = {
-  "nil": function (test) {
-    test.strictEqual(null, edn.valueOf(edn.parse('nil')));
-    test.done();
-  },
+describe('valueOf', function () {
 
-  "booleans": function (test) {
-    test.strictEqual(true, edn.valueOf(edn.parse('true')));
-    test.strictEqual(false, edn.valueOf(edn.parse('false')));
-    test.done();
-  },
+  it('should handle nil', function (done) {
+    expect(edn.valueOf(edn.parse('nil'))).to.be.null;
+    done();
+  });
 
-  "strings": function (test) {
-    test.strictEqual(
-      "double quotes",
-      edn.valueOf(edn.parse('"double quotes"'))
-    );
-    test.done();
-  },
+  it('should handle booleans', function (done) {
+    expect(edn.valueOf(edn.parse('true'))).to.be.true;
+    expect(edn.valueOf(edn.parse('false'))).to.be.false;
+    done();
+  });
 
-  "characters": function (test) {
-    test.strictEqual("c", edn.valueOf(edn.parse('\\c')));
-    test.done();
-  },
+  it('should handle strings', function (done) {
+    expect(edn.valueOf(edn.parse('"double quotes"'))).to.equal('double quotes');
+    done();
+  });
 
-  "symbols": function (test) {
-    test.strictEqual("foo", edn.valueOf(edn.parse('foo')));
-    test.done();
-  },
+  it('should handle characters', function (done) {
+    expect(edn.valueOf(edn.parse('\\c'))).to.equal('c');
+    done();
+  });
 
-  "keywords": function (test) {
-    test.strictEqual("foo", edn.valueOf(edn.parse(':foo')));
-    test.done();
-  },
+  it('should handle symbols', function (done) {
+    expect(edn.valueOf(edn.parse('foo'))).to.equal('foo');
+    done();
+  });
 
-  "integers": function (test) {
-    test.strictEqual(42, edn.valueOf(edn.parse('42')));
-    test.done();
-  },
+  it('should handle keywords', function (done) {
+    expect(edn.valueOf(edn.parse(':foo'))).to.equal('foo');
+    done();
+  });
 
-  "floating point numbers": function (test) {
-    test.strictEqual(3.14, edn.valueOf(edn.parse('3.14')));
-    test.done();
-  },
+  it('should handle integers', function (done) {
+    expect(edn.valueOf(edn.parse('42'))).to.equal(42);
+    done();
+  });
 
-  "lists": function (test) {
-    test.deepEqual(
-      ['a', 'b', 42],
-      edn.valueOf(edn.parse('(a b 42)'))
-    );
-    test.deepEqual(
-      [edn.Symbol('a'), edn.Symbol('b'), edn.integer(42)],
-      edn.valueOf(edn.parse('(a b 42)'), false)
-    );
-    test.done();
-  },
+  it('should handle floating point numbers', function (done) {
+    expect(edn.valueOf(edn.parse('3.14'))).to.equal(3.14);
+    done();
+  });
 
-  "vectors": function (test) {
-    test.deepEqual(
-      ['a', 'b', 42],
-      edn.valueOf(edn.parse('[a b 42]'))
-    );
-    test.deepEqual(
-      [edn.Symbol('a'), edn.Symbol('b'), edn.integer(42)],
-      edn.valueOf(edn.parse('[a b 42]'), false)
-    );
-    test.done();
-  },
+  it('should handle lists', function (done) {
+    expect(edn.valueOf(edn.parse('(a b 42)'))).to.deep.equal(['a', 'b', 42]);
+    expect(edn.valueOf(edn.parse('(a b 42)'), false)).to.deep.equal([edn.Symbol('a'), edn.Symbol('b'), edn.integer(42)]);
+    done();
+  });
 
-  "maps": function (test) {
-    test.deepEqual(
-      {},
-      edn.valueOf(edn.parse('{}'))
-    );
-    test.deepEqual(
-      {foo: 1, bar: 2},
-      edn.valueOf(edn.parse('{:foo 1, :bar 2}'))
-    );
-    test.deepEqual(
-      {foo: 1, bar: 2},
-      edn.valueOf(edn.parse('{"foo" 1, "bar" 2}'))
-    );
-    test.deepEqual(
-      {1: 2, 3: 4},
-      edn.valueOf(edn.parse('{1 2, 3 4}'))
-    );
-    test.deepEqual(
-      {foo: 'bar'},
-      edn.valueOf(edn.parse('{:foo :bar}'))
-    );
-    test.deepEqual(
-      {foo: edn.keyword('bar')},
-      edn.valueOf(edn.parse('{:foo :bar}'), false)
-    );
+  it('should handle vectors', function (done) {
+    expect(edn.valueOf(edn.parse('[a b 42]'))).to.deep.equal(['a', 'b', 42]);
+    expect(edn.valueOf(edn.parse('[a b 42]'), false)).to.deep.equal([edn.Symbol('a'), edn.Symbol('b'), edn.integer(42)]);
+    done();
+  });
+
+  it('should handle maps', function (done) {
+    expect(edn.valueOf(edn.parse('{}'))).to.deep.equal({});
+    expect(edn.valueOf(edn.parse('{:foo 1, :bar 2}'))).to.deep.equal({foo: 1, bar: 2});
+    expect(edn.valueOf(edn.parse('{"foo" 1, "bar" 2}'))).to.deep.equal({foo: 1, bar: 2});
+    expect(edn.valueOf(edn.parse('{1 2, 3 4}'))).to.deep.equal({1: 2, 3: 4});
+    expect(edn.valueOf(edn.parse('{:foo :bar}'))).to.deep.equal({foo: 'bar'});
+    expect(edn.valueOf(edn.parse('{:foo :bar}'), false)).to.deep.equal({foo: edn.keyword('bar')});
 
     var arrayMap = new edn.Map();
     arrayMap.set([1, 2, 3], 4);
-    test.strictEqual(arrayMap, edn.valueOf(arrayMap));
+    expect(edn.valueOf(arrayMap)).to.equal(arrayMap);
+    done();
+  });
 
-    test.done();
-  },
+  it('should handle sets', function (done) {
+    // the nodeunit test uses == while chai uses ===
+    expect(edn.valueOf(edn.parse('#{1 2 3}'))).to.deep.equal([1, 2, 3]);
+    expect(edn.valueOf(edn.parse('#{\\a \\b \\c}'), false)).to.deep.equal([edn.Character('a'), edn.Character('b'), edn.Character('c')]);
+    done();
+  });
 
-  "sets": function (test) {
-    test.deepEqual(
-      [1, 2, 3],
-      edn.valueOf(edn.parse('#{1 2 3}'))
-    );
-    test.deepEqual(
-      ['a', 'b', 'c'],
-      edn.valueOf(edn.parse('#{\\a \\b \\c}'))
-    );
-    test.done();
-  },
+  it('should handle generic', function (done) {
+    // the nodeunit test uses == while chai uses ===
+    expect(edn.valueOf(edn.parse('#myapp/Person {:first "Fred", :last "Mertz"}'))).to.deep.equal({first: 'Fred', last: 'Mertz'});
+    done();
+  });
 
-  "generic": function (test) {
-    test.deepEqual(
-      {first: "Fred", last: "Mertz"},
-      edn.valueOf(edn.parse('#myapp/Person {:first "Fred", :last "Mertz"}'))
-    );
-
-    test.done();
-  },
-};
+});

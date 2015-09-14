@@ -1,80 +1,81 @@
-"use strict";
+/*jshint expr: true*/
 
-var edn = require('../edn');
+'use strict';
 
-exports.objects = {
-  "string": function (test) {
-    test.equal("hello", edn.convert("hello"));
-    test.done();
-  },
+var edn = require('../edn'),
+    expect = require('chai').expect;
 
-  "uuid": function (test) {
-    test.deepEqual(
-      edn.generic('uuid', "f81d4fae-7dec-11d0-a765-00a0c91e6bf6"),
-      edn.convert(edn.UUID("f81d4fae-7dec-11d0-a765-00a0c91e6bf6"))
-    );
-    test.done();
-  },
+describe('convert', function () {
+  it('should convert a string to itself', function (done) {
+    expect(edn.convert('hello')).to.equal('hello');
+    done();
+  });
 
-  "date": function (test) {
-    test.deepEqual(
-      edn.generic('inst', "1985-04-12T23:20:50.520Z"),
-      edn.convert(new Date(Date.parse("1985-04-12T23:20:50.52Z")))
-    );
-    test.done();
-  },
+  it('should convert UUIDs', function (done) {
+    expect(edn.convert(edn.UUID('f81d4fae-7dec-11d0-a765-00a0c91e6bf6'))).to.deep
+        .equal(edn.generic('uuid', 'f81d4fae-7dec-11d0-a765-00a0c91e6bf6'));
+    done();
+  });
 
-  "person as edn": function (test) {
+  it('should convert Dates', function (done) {
+    expect(edn.convert(new Date(Date.parse('1985-04-12T23:20:50.52Z')))).to.deep
+        .equal(edn.generic('inst', '1985-04-12T23:20:50.520Z'));
+    done();
+  });
+
+  it('should convert a Person object', function (done) {
     function Person(first, last) {
       this.first = first;
-      this.last  = last;
+      this.last = last;
     }
-    var p = new Person("Fred", "Mertz");
 
-    test.throws(function () { edn.convert(p); });
+    var p = new Person('Fred', 'Mertz');
+
+    expect(function () {
+      edn.convert(p);
+    }).to.throw(Error);
 
     Person.prototype.asEDN = function () {
       return edn.generic(
-        "myapp/Person",
-        {first: this.first, last: this.last}
+          'myapp/Person',
+          {first: this.first, last: this.last}
       );
     };
 
-    test.deepEqual(
-      edn.generic("myapp/Person", {first: "Fred", last: "Mertz"}),
-      edn.convert(p)
-    );
+    expect(edn.convert(p)).to.deep.equal(edn.generic('myapp/Person', {first: 'Fred', last: 'Mertz'}));
+    done();
+  });
 
-    test.done();
-  },
-
-  "person converter": function (test) {
+  it('should convert an object', function (done) {
     function Person(first, last) {
       this.first = first;
-      this.last  = last;
+      this.last = last;
     }
-    var p = new Person("Fred", "Mertz");
+
+    var p = new Person('Fred', 'Mertz');
 
     function isPerson(obj) {
       return obj instanceof Person;
     }
+
     function convertPerson(p) {
       return edn.generic(
-        "myapp/Person",
-        {first: p.first, last: p.last}
+          'myapp/Person',
+          {first: p.first, last: p.last}
       );
     }
 
-    test.throws(function () { edn.convert(p); });
+    expect(function () {
+      edn.convert(p);
+    }).to.throw(Error);
 
-    test.deepEqual(
-      edn.generic("myapp/Person", {first: "Fred", last: "Mertz"}),
-      edn.convert(p, {
-        types: { "myapp/Person": isPerson },
-        converters: { "myapp/Person": convertPerson }
-      })
-    );
+    expect(edn.convert(p, {
+      types: {'myapp/Person': isPerson},
+      converters: {'myapp/Person': convertPerson}
+    }))
+        .to.deep.equal(edn.generic('myapp/Person', {first: 'Fred', last: 'Mertz'}));
+    done();
 
-    test.done();
-  }
-};
+  });
+
+});

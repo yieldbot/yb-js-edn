@@ -1,235 +1,180 @@
-"use strict";
+/*jshint expr: true*/
 
-var edn = require('../edn');
+'use strict';
 
-exports.primitives = {
-  "undefined": function (test) {
-    test.equal('nil', edn.stringify(undefined));
-    test.done();
-  },
+var edn = require('../edn'),
+    expect = require('chai').expect;
 
-  "null": function (test) {
-    test.equal('nil', edn.stringify(null));
-    test.done();
-  },
+describe('stringify', function () {
+  it('should handle undefined', function (done) {
+    expect(edn.stringify(undefined)).to.equal('nil');
+    done();
+  });
 
-  "true": function (test) {
-    test.equal('true', edn.stringify(true));
-    test.done();
-  },
+  it('should handle null', function (done) {
+    expect(edn.stringify(null)).to.equal('nil');
+    done();
+  });
 
-  "false": function (test) {
-    test.equal('false', edn.stringify(false));
-    test.done();
-  },
+  it('should handle true', function (done) {
+    expect(edn.stringify(true)).to.equal('true');
+    done();
+  });
 
-  "string": function (test) {
-    test.equal('"hello"', edn.stringify("hello"));
-    test.done();
-  },
+  it('should handle false', function (done) {
+    expect(edn.stringify(false)).to.equal('false');
+    done();
+  });
 
-  "number": function (test) {
-    test.equal('42', edn.stringify(42));
-    test.equal('3.14', edn.stringify(3.14));
-    test.done();
-  }
-};
+  it('should handle string', function (done) {
+    expect(edn.stringify('hello')).to.equal('"hello"');
+    done();
+  });
 
-exports.objects = {
-  "true": function (test) {
-    test.equal('true', edn.stringify(new Object(true)));
-    test.done();
-  },
+  it('should handle Object(true)', function (done) {
+    expect(edn.stringify(new Object(true))).to.equal('true');
+    done();
+  });
 
-  "false": function (test) {
-    test.equal('false', edn.stringify(new Object(false)));
-    test.done();
-  },
+  it('should handle Object(false)', function (done) {
+    expect(edn.stringify(new Object(false))).to.equal('false');
+    done();
+  });
 
-  "string": function (test) {
-    test.equal('"hello"', edn.stringify(new Object("hello")));
-    test.done();
-  },
+  it('should handle Object(string)', function (done) {
+    expect(edn.stringify(new Object('hello'))).to.equal('"hello"');
+    done();
+  });
 
-  "number": function (test) {
-    test.equal('42', edn.stringify(new Object(42)));
-    test.equal('3.14', edn.stringify(new Object(3.14)));
-    test.done();
-  },
+  it('should handle Object(number)', function (done) {
+    expect(edn.stringify(new Object(42))).to.equal('42');
+    expect(edn.stringify(new Object(3.14))).to.equal('3.14');
+    done();
+  });
 
-  "array": function (test) {
-    test.equal('[1 2 3]', edn.stringify([1, 2, 3]));
-    test.done();
-  },
+  it('should handle array', function (done) {
+    expect(edn.stringify([1, 2, 3])).to.equal('[1 2 3]');
+    done();
+  });
 
-  "object": function (test) {
-    test.equal('{:foo 1, :bar 2}', edn.stringify({foo: 1, bar: 2}));
-    test.done();
-  },
+  it('should handle object', function (done) {
+    expect(edn.stringify({foo: 1, bar: 2})).to.equal('{:foo 1, :bar 2}');
+    done();
+  });
 
-  "characters": function (test) {
-    var c;
+  it('should handle characters', function (done) {
+    expect(edn.stringify(edn.Character('c'))).to.equal('\\c');
+    expect(edn.stringify(edn.Character('\n'))).to.equal('\\newline');
+    expect(edn.stringify(edn.Character('\r'))).to.equal('\\return');
+    expect(edn.stringify(edn.Character(' '))).to.equal('\\space');
+    expect(edn.stringify(edn.Character('\t'))).to.equal('\\tab');
+    done();
+  });
 
-    c = edn.Character("c");
-    test.equal('\\c', edn.stringify(c));
+  it('should handle symbols', function (done) {
+    expect(edn.stringify(edn.Symbol('foo'))).to.equal('foo');
+    expect(edn.stringify(edn.Symbol('my-namespace/foo'))).to.equal('my-namespace/foo');
+    done();
+  });
 
-    c = edn.Character("\n");
-    test.equal('\\newline', edn.stringify(c));
+  it('should handle keywords', function (done) {
+    expect(edn.stringify(edn.keyword('fred'))).to.equal(':fred');
+    expect(edn.stringify(edn.keyword('my/fred'))).to.equal(':my/fred');
+    done();
+  });
 
-    c = edn.Character("\r");
-    test.equal('\\return', edn.stringify(c));
+  it('should handle lists', function (done) {
+    expect(edn.stringify(edn.list([edn.symbol('a'), edn.symbol('b'), 42]))).to.equal('(a b 42)');
+    done();
+  });
 
-    c = edn.Character(" ");
-    test.equal('\\space', edn.stringify(c));
+  it('should handle vectors', function (done) {
+    expect(edn.stringify(edn.vector([edn.symbol('a'), edn.symbol('b'), 42]))).to.equal('[a b 42]');
+    done();
+  });
 
-    c = edn.Character("\t");
-    test.equal('\\tab', edn.stringify(c));
-
-    test.done();
-  },
-
-  "symbols": function (test) {
-    var s;
-
-    s = edn.Symbol("foo");
-    test.equal('foo', edn.stringify(s));
-
-    s = edn.Symbol("my-namespace/foo");
-    test.equal('my-namespace/foo', edn.stringify(s));
-
-    test.done();
-  },
-
-  "keywords": function (test) {
-    var k;
-
-    k = edn.Keyword("fred");
-    test.equal(':fred', edn.stringify(k));
-
-    k = edn.Keyword("my/fred");
-    test.equal(':my/fred', edn.stringify(k));
-
-    test.done();
-  },
-
-  "lists": function (test) {
-    var l = edn.list([edn.symbol('a'), edn.symbol('b'), 42]);
-    test.equal('(a b 42)', edn.stringify(l));
-    test.done();
-  },
-
-  "vectors": function (test) {
-    var v = edn.vector([edn.symbol('a'), edn.symbol('b'), 42]);
-    test.equal('[a b 42]', edn.stringify(v));
-    test.done();
-  },
-
-  "map": function (test) {
+  it('should handle maps', function (done) {
     var map = new edn.Map();
     map.set('foo', 1);
     map.set('bar', 2);
-    test.equal('{"foo" 1, "bar" 2}', edn.stringify(map));
-
+    expect(edn.stringify(map)).to.equal('{"foo" 1, "bar" 2}');
     map = edn.map([
       edn.keyword('a'), 1,
-      "foo", edn.keyword('bar'),
+      'foo', edn.keyword('bar'),
       edn.vector([1, 2, 3]),
       edn.symbol('four')
     ]);
-    test.equal('{:a 1, "foo" :bar, [1 2 3] four}', edn.stringify(map));
+    expect(edn.stringify(map)).to.equal('{:a 1, "foo" :bar, [1 2 3] four}');
+    done();
+  });
 
-    test.done();
-  },
-
-  "set": function (test) {
+  it('should handle sets', function (done) {
     var set = new edn.Set();
     set.add('a');
     set.add('b');
     set.add([1, 2, 3]);
-    test.equal('#{"a" "b" [1 2 3]}', edn.stringify(set));
-
+    expect(edn.stringify(set)).to.equal('#{"a" "b" [1 2 3]}');
     set = edn.set([
       edn.symbol('a'),
       edn.symbol('b'),
       edn.vector([1, 2, 3])
     ]);
-    test.equal('#{a b [1 2 3]}', edn.stringify(set));
+    expect(edn.stringify(set)).to.equal('#{a b [1 2 3]}');
+    done();
+  });
 
-    test.done();
-  },
-
-  "generic": function (test) {
+  it('should handle generic', function (done) {
     var p = new edn.Map();
-    p.set(edn.Keyword('first'), "Fred");
-    p.set(edn.Keyword('last'), "Mertz");
-    test.equal(
-      '{:first "Fred", :last "Mertz"}',
-      edn.stringify(p)
-    );
-
+    p.set(edn.Keyword('first'), 'Fred');
+    p.set(edn.Keyword('last'), 'Mertz');
+    expect(edn.stringify(p)).to.equal('{:first "Fred", :last "Mertz"}');
     p = edn.generic(edn.Symbol('myapp/Person'), p);
-    test.equal(
-      '#myapp/Person {:first "Fred", :last "Mertz"}',
-      edn.stringify(p)
-    );
-    test.done();
-  },
+    expect(edn.stringify(p)).to.equal('#myapp/Person {:first "Fred", :last "Mertz"}');
+    done();
+  });
 
-  "date": function (test) {
-    var d = new Date(Date.parse("1985-04-12T23:20:50.52Z"));
-    test.equal('#inst "1985-04-12T23:20:50.520Z"', edn.stringify(d));
-    test.done();
-  },
+  it('should handle inst', function (done) {
+    expect(edn.stringify(new Date(Date.parse('1985-04-12T23:20:50.52Z')))).to.equal('#inst "1985-04-12T23:20:50.520Z"');
+    done();
+  });
 
-  "uuid": function (test) {
-    var uuid = edn.UUID("f81d4fae-7dec-11d0-a765-00a0c91e6bf6");
-    test.equal(
-      '#uuid "f81d4fae-7dec-11d0-a765-00a0c91e6bf6"',
-      edn.stringify(uuid)
-    );
-    test.done();
-  },
+  it('should handle uuid', function (done) {
+    expect(edn.stringify(edn.UUID('f81d4fae-7dec-11d0-a765-00a0c91e6bf6'))).to.equal('#uuid "f81d4fae-7dec-11d0-a765-00a0c91e6bf6"');
+    done();
+  });
 
-  "person toEDN": function (test) {
+  it('should handle person toEDN', function (done) {
     function Person(first, last) {
       this.first = first;
       this.last  = last;
     }
     Person.prototype.toEDN = function () {
       return [
-        "#myapp/Person",
+        '#myapp/Person',
         edn.stringify({first: this.first, last: this.last})
-      ].join(" ");
+      ].join(' ');
     };
 
-    var p = new Person("Fred", "Mertz");
-    test.equal(
-      '#myapp/Person {:first "Fred", :last "Mertz"}',
-      edn.stringify(p)
-    );
+    var p = new Person('Fred', 'Mertz');
+    expect(edn.stringify(p)).to.equal('#myapp/Person {:first "Fred", :last "Mertz"}');
+    done();
+  });
 
-    test.done();
-  },
-
-  "person asEDN": function (test) {
+  it('should handle person asEDN', function (done) {
     function Person(first, last) {
       this.first = first;
       this.last  = last;
     }
     Person.prototype.asEDN = function () {
-      return edn.generic("myapp/Person", {first: this.first, last: this.last});
+      return edn.generic('myapp/Person', {first: this.first, last: this.last});
     };
 
-    var p = new Person("Fred", "Mertz");
-    test.equal(
-      '#myapp/Person {:first "Fred", :last "Mertz"}',
-      edn.stringify(p)
-    );
+    var p = new Person('Fred', 'Mertz');
+    expect(edn.stringify(p)).to.equal('#myapp/Person {:first "Fred", :last "Mertz"}');
+    done();
+  });
 
-    test.done();
-  },
-
-  "person printer": function (test) {
+  it('should handle person printer', function (done) {
     function Person(first, last) {
       this.first = first;
       this.last  = last;
@@ -239,24 +184,20 @@ exports.objects = {
     }
     function printPerson(p) {
       return [
-        "#myapp/Person",
+        '#myapp/Person',
         edn.stringify({first: p.first, last: p.last})
-      ].join(" ");
+      ].join(' ');
     }
 
-    var p = new Person("Fred", "Mertz");
-    test.equal(
-      '#myapp/Person {:first "Fred", :last "Mertz"}',
-      edn.stringify(p, {
-        types: { "myapp/Person": isPerson },
-        printers: { "myapp/Person": printPerson }
-      })
-    );
+    var p = new Person('Fred', 'Mertz');
+    expect(edn.stringify(p, {
+      types: { 'myapp/Person': isPerson },
+      printers: { 'myapp/Person': printPerson }
+    })).to.equal('#myapp/Person {:first "Fred", :last "Mertz"}');
+    done();
+  });
 
-    test.done();
-  },
-
-  "person converter": function (test) {
+  it('should handle person converter', function (done) {
     function Person(first, last) {
       this.first = first;
       this.last  = last;
@@ -266,20 +207,17 @@ exports.objects = {
     }
     function convertPerson(p) {
       return edn.generic(
-        "myapp/Person",
-        {first: p.first, last: p.last}
+          'myapp/Person',
+          {first: p.first, last: p.last}
       );
     }
 
-    var p = new Person("Fred", "Mertz");
-    test.equal(
-      '#myapp/Person {:first "Fred", :last "Mertz"}',
-      edn.stringify(p, {
-        types: { "myapp/Person": isPerson },
-        converters: { "myapp/Person": convertPerson }
-      })
-    );
+    var p = new Person('Fred', 'Mertz');
+    expect(edn.stringify(p, {
+      types: { 'myapp/Person': isPerson },
+      converters: { 'myapp/Person': convertPerson }
+    })).to.equal('#myapp/Person {:first "Fred", :last "Mertz"}');
+    done();
+  });
 
-    test.done();
-  }
-};
+});
