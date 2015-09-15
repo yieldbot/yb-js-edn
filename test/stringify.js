@@ -31,6 +31,31 @@ describe('stringify', function () {
     done();
   });
 
+  it('should handle numbers', function (done) {
+    expect(edn.stringify(42)).to.equal('42');
+    expect(edn.stringify(-42)).to.equal('-42');
+    expect(edn.stringify(-0)).to.equal('0');
+    expect(edn.stringify(3.14)).to.equal('3.14');
+    expect(edn.stringify(+3.14)).to.equal('3.14');
+    expect(edn.stringify(-3.14)).to.equal('-3.14');
+    expect(edn.stringify(1.2e+2)).to.equal('120');
+    expect(edn.stringify(+1.2e+2)).to.equal('120');
+    expect(edn.stringify(-1.2e+2)).to.equal('-120');
+    expect(edn.stringify(1.2e2)).to.equal('120');
+    expect(edn.stringify(+1.2e2)).to.equal('120');
+    expect(edn.stringify(-1.2e2)).to.equal('-120');
+    expect(edn.stringify(12e2)).to.equal('1200');
+    expect(edn.stringify(+12e2)).to.equal('1200');
+    expect(edn.stringify(-12e2)).to.equal('-1200');
+    expect(edn.stringify(12e-2)).to.equal('0.12');
+    expect(edn.stringify(+12e-2)).to.equal('0.12');
+    expect(edn.stringify(-12e-2)).to.equal('-0.12');
+    expect(edn.stringify(1e-8)).to.equal('1e-8');
+    expect(edn.stringify(+1e-8)).to.equal('1e-8');
+    expect(edn.stringify(-1e-8)).to.equal('-1e-8');
+    done();
+  });
+
   it('should handle Object(true)', function (done) {
     expect(edn.stringify(new Object(true))).to.equal('true');
     done();
@@ -49,6 +74,7 @@ describe('stringify', function () {
   it('should handle Object(number)', function (done) {
     expect(edn.stringify(new Object(42))).to.equal('42');
     expect(edn.stringify(new Object(3.14))).to.equal('3.14');
+    expect(edn.stringify(new Object(1e-7))).to.equal('1e-7');
     done();
   });
 
