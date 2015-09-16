@@ -931,7 +931,7 @@ edn.Keyword = (function () {
   // Returns String.
   edn.printers.float = function (n) {
     var s = n.toString();
-    if (!/\.|[eE][-+]*\d+$/.test(s)) s += '.0';
+    if (n % 1.0 === 0) s+= '.0';
     return s;
   };
 
