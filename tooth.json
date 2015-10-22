@@ -1,0 +1,7 @@
+{
+  "coordinates": {
+    "org": "com.yieldbot.node",
+    "name": "yb-js-edn",
+    "type": "npm"
+  }
+}

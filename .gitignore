@@ -1,4 +1,15 @@
-node_modules/
-.idea/
-coverage/
+.DS_Store
+.idea
+.settings
+.coverrun
+.coverdata
+.env
+*.log
+*.heapsnapshot
+xunit.xml
+npm-debug.log
 
+node_modules/
+tmp/*
+logs/*
+reports/*
