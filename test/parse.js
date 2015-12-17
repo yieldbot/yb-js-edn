@@ -59,7 +59,13 @@ describe('parse', function () {
 
   it('should parse floating point numbers', function (done) {
     /* jshint ignore:start */
+    assert(edn.parse('6.178023E-2') == 6.178023E-2, 'not strctly equal');
+    assert(edn.parse('6.178023E7') == 6.178023E7, 'not strctly equal');
+    assert(edn.parse('63.2E0') == 63.2, 'not strctly equal');
+    assert(edn.parse('0.178023') == 0.178023, 'not strctly equal');
+    assert(edn.parse('6.2E7') == 6.2E7, 'not strctly equal');
     assert(edn.parse('3.14') == 3.14, 'not strctly equal');
+    assert(edn.parse('9.0') == 9.0, 'not strctly equal');
     assert(edn.parse('9.0') == 9.0, 'not strctly equal');
     /* jshint ignore:end */
     done();

@@ -1,6 +1,6 @@
 {
   "name": "yb-js-edn",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "yb-js-edn",
   "keywords": [
     "yb-js-edn"
@@ -32,14 +32,14 @@
   ],
   "main": "./edn.js",
   "devDependencies": {
-    "chai": "3.2.x",
+    "chai": "3.4.x",
     "jison": "^0.4.15",
     "jshint": "2.8.x",
-    "jshint-stylish": "2.0.x",
-    "mocha": "2.2.x",
+    "jshint-stylish": "2.1.x",
+    "mocha": "2.3.x",
     "mocha-multi": "0.7.x",
     "dependency-check": "2.5.x",
-    "istanbul": "^0.3.17",
+    "istanbul": "0.4.x",
     "yb-publish": "0.3.x"
   },
   "scripts": {
