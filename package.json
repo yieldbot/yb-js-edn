@@ -51,6 +51,7 @@
     "test:unit": "mkdir -p reports/ && NODE_ENV=test multi='spec=- xunit=reports/mocha-xunit.xml' istanbul cover _mocha -- -R mocha-multi test/**.js && istanbul check-coverage",
     "test": "npm run depcheck && npm run depcheck:unused && npm run lint && npm run test:unit",
     "edn.js": "echo \"(function() {\n\" > edn.js && ./node_modules/.bin/jison -m js -o parser.js~ ./src/edn.jison && cat parser.js~ >> edn.js && rm parser.js~ && cat ./src/edn.js >> edn.js && echo \"})();\n\" >> edn.js",
+    "buildci": "npm run clean && npm install && npm run lint:build && npm run test",
     "build": "npm run clean && npm install && npm run lint:build && npm run edn.js && npm run test",
     "ybpublish": "publish"
   }

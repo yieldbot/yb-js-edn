@@ -3,5 +3,13 @@
     "org": "com.yieldbot.node",
     "name": "yb-js-edn",
     "type": "npm"
+  },
+  "build": [
+    "CI_ENV=ci npm run buildci"
+  ],
+  "pipeline": {
+    "shouldDisable": "false",
+    "recipients": "devops@yieldbot.com",
+    "notifyFailure": "true"
   }
 }
