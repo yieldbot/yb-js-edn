@@ -50,9 +50,9 @@ describe('stringify', function () {
     expect(edn.stringify(12e-2)).to.equal('0.12');
     expect(edn.stringify(+12e-2)).to.equal('0.12');
     expect(edn.stringify(-12e-2)).to.equal('-0.12');
-    expect(edn.stringify(1e-8)).to.equal('1e-8');
-    expect(edn.stringify(+1e-8)).to.equal('1e-8');
-    expect(edn.stringify(-1e-8)).to.equal('-1e-8');
+    expect(edn.stringify(1e-8)).to.equal('0.00000001');
+    expect(edn.stringify(+1e-8)).to.equal('0.00000001');
+    expect(edn.stringify(-1e-8)).to.equal('-0.00000001');
     done();
   });
 
@@ -74,7 +74,7 @@ describe('stringify', function () {
   it('should handle Object(number)', function (done) {
     expect(edn.stringify(new Object(42))).to.equal('42');
     expect(edn.stringify(new Object(3.14))).to.equal('3.14');
-    expect(edn.stringify(new Object(1e-7))).to.equal('1e-7');
+    expect(edn.stringify(new Object(1e-7))).to.equal('0.0000001');
     done();
   });
 

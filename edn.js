@@ -1648,7 +1648,7 @@ edn.Keyword = (function () {
   //
   // Returns String.
   edn.printers.float = function (n) {
-    var s = n.toString();
+    var s = n.toFixed(15).replace(/\.?0*$/,'');
     if (n % 1.0 === 0) s+= '.0';
     return s;
   };
