@@ -86,14 +86,7 @@ EdnBooleanLiteral
 EdnString
     : STRING
         { // replace escaped characters with actual character
-          $$ = yytext.substr(1,yyleng-2)
-                 .replace(/\\(\\|")/g, "$"+"1")
-                 .replace(/\\n/g,'\n')
-                 .replace(/\\r/g,'\r')
-                 .replace(/\\t/g,'\t')
-                 .replace(/\\v/g,'\v')
-                 .replace(/\\f/g,'\f')
-                 .replace(/\\b/g,'\b');
+          $$ = JSON.parse(yytext);
         }
     ;
 

@@ -4,6 +4,9 @@ false
 "double quotes"
 "escaped \\"
 "hello\nworld"
+"hello\\nworld"
+"hello\\\nworld"
+"hello\\\\nworld"
 "hello\rworld"
 "hello\tworld"
 \c
