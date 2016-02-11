@@ -931,8 +931,9 @@ edn.Keyword = (function () {
   // Returns String.
   edn.printers.float = function (n) {
     var s = n.toFixed(15).replace(/\.?0*$/,'');
-    if (n % 1.0 === 0) s+= '.0';
-    return s;
+    var pieces = s.split('e');
+    if (pieces[0].match(/^((?!\.).)*$/)) pieces[0] += '.0';
+    return pieces.join('e');
   };
 
   // Public: Get valueOf returns primitive number.
